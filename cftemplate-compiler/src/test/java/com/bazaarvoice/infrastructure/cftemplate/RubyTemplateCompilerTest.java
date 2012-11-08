@@ -181,4 +181,9 @@ public class RubyTemplateCompilerTest extends TemplateCompilerTest {
     public void testCompile_with_duplicate_parameter_and_resource() {
         assertCompile("duplicateParameterAndResource", 1);
     }
+
+    @Test
+    public void testCompile_wait_condition_resource_utility() {
+        assertCompile("resourceWaitCondition");
+    }
 }

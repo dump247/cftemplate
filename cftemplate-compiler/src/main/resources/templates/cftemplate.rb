@@ -8,6 +8,73 @@ class Numeric
   end
 end
 
+module CloudFormation
+  # Generate a AWS::CloudFormation::WaitConditionHandle resource.
+  # A wait condition handle has no properties or other configuration options.
+  #
+  # @example
+  #     wait_condition_handle 'myWaitHandle'
+  #
+  # @param name [String] name of the resource
+  # @return [void]
+  # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-waitconditionhandle.html AWS::CloudFormation::WaitConditionHandle
+  def wait_condition_handle(name)
+    resource name, 'AWS::CloudFormation::WaitConditionHandle'
+  end
+
+  # Generate a AWS::CloudFormation::WaitCondition resource.
+  #
+  # @example Wait for 1 signal or timeout after 1800 seconds (5 minutes) and generate a WaitConditionHandle with name myWaitConditionHandle
+  #     wait_condition 'myWaitCondition'
+  # @example Timeout 4500 seconds after the resource Ec2Instance is created. A WaitConditionHandle with name myWaitConditionHandle is generated automatically.
+  #     wait_condition 'myWaitCondition', :timeout => 4500, :resource => 'Ec2Instance'
+  #
+  # @param name [String] name of the resource
+  # @option options [Fixnum] :timeout (1800) Number of seconds to wait for the required number of signals.
+  # @option options [String] :resource (nil) Name of the resource to associate with the condition. This becomes the DependsOn of the resulting wait condition resource.
+  #                                          After the resource is created, CloudFormation will wait for the condition to be signaled.
+  # @option options [Fixnum] :count (1) Number of signals to wait for.
+  # @option options [String, Ref] :handle (new handle) Name of a AWS::CloudFormation::WaitConditionHandle resource.
+  #                                                    If not specified, a new wait handle resource named "<name>Handle" is created if it does not already exist.
+  #                                                    This can be either a resource name string or a Ref function result.
+  # @return [void]
+  # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-waitcondition.html AWS::CloudFormation::WaitCondition
+  def wait_condition(name, options={})
+    location = caller()[0]
+
+    depends_on = options.delete :resource
+
+    properties = {
+        'Timeout' => options.delete(:timeout) || 1800,
+        'Count' => options.delete(:count),
+        'Handle' => options.delete(:handle)
+    }.reject { |k, v| v.nil? }
+    
+    if properties.include? 'Handle'
+      if properties['Handle'].is_a? String
+        properties['Handle'] = ref(properties['Handle'])
+      end
+    else
+      handle_name = "#{name}Handle"
+
+      if not resources.include?(handle_name)
+        wait_condition_handle handle_name
+      end
+
+      properties['Handle'] = ref(handle_name)
+    end
+
+    if not options.empty?
+      $cftemplate_output.error(location, "Unknown options for wait condition: #{options}")
+    end
+
+    resource name, 'AWS::CloudFormation::WaitCondition', {
+        'Properties' => properties,
+        'DependsOn' => depends_on
+    }.reject { |k, v| v.nil? }
+  end
+end
+
 # CloudFormation EC2 functions.
 module EC2
   # @attr_reader [String] type type of the instance (m1, m2, etc)
@@ -205,10 +272,16 @@ end
 
 class TemplateV1
   include Fn
+  include CloudFormation
 
   VERSION='2010-09-09'
 
-  def initialize(&block)
+  attr_reader :description, :resources
+
+  def initialize(description='', &block)
+    @description = description
+    @resources = {}
+
     instance_eval(&block)
   end
 
@@ -323,12 +396,16 @@ class TemplateV1
     location = caller()[0]
 
     if type.is_a? Hash
-      resource = options.merge(type)
+      resource = clean_obj(options.merge(type))
     else
-      resource = options.merge('Type' => type)
+      resource = clean_obj(options.merge('Type' => type))
     end
 
-    $cftemplate_output.addResource(location, name, clean_obj(resource))
+    if not resources.include?(name)
+      resources[name] = resource
+    end
+
+    $cftemplate_output.addResource(location, name, resource)
   end
 
   def output(name, value, description='')
@@ -449,7 +526,7 @@ def template(version, description='', &block)
 
   case version
     when TemplateV1::VERSION
-      tmpl = TemplateV1.new(&block)
+      tmpl = TemplateV1.new(description, &block)
     else
       return
   end

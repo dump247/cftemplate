@@ -6,6 +6,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
 import org.junit.After;
 import org.junit.Before;
 import org.reflections.Reflections;
@@ -46,13 +47,13 @@ public class TemplateCompilerTest {
     }
 
     protected void assertJsonEquals(File expected, File actual) {
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
 
         try {
             JsonNode expectedNode = mapper.readTree(expected);
             JsonNode actualNode = mapper.readTree(actual);
 
-            assertEquals(expectedNode, actualNode);
+            assertEquals(mapper.writeValueAsString(expectedNode), mapper.writeValueAsString(actualNode));
         } catch (Exception ex) {
             throw Throwables.propagate(ex);
         }

@@ -1,0 +1,98 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Resources" : {
+    "Dummy" : {
+      "Type" : "AWS::CloudFormation::Stack",
+      "Properties" : {
+        "TemplateURL" : "http://localhost/no.template"
+      }
+    },
+    "C6Handle" : {
+      "Type" : "AWS::CloudFormation::WaitConditionHandle",
+      "Properties" : { }
+    },
+    "C0Handle" : {
+      "Type" : "AWS::CloudFormation::WaitConditionHandle",
+      "Properties" : { }
+    },
+    "C0" : {
+      "Type" : "AWS::CloudFormation::WaitCondition",
+      "Properties" : {
+        "Timeout" : "1800",
+        "Handle" : {
+          "Ref" : "C0Handle"
+        }
+      }
+    },
+    "C1Handle" : {
+      "Type" : "AWS::CloudFormation::WaitConditionHandle",
+      "Properties" : { }
+    },
+    "C1" : {
+      "Type" : "AWS::CloudFormation::WaitCondition",
+      "Properties" : {
+        "Timeout" : "10",
+        "Handle" : {
+          "Ref" : "C1Handle"
+        }
+      }
+    },
+    "C2Handle" : {
+      "Type" : "AWS::CloudFormation::WaitConditionHandle",
+      "Properties" : { }
+    },
+    "C2" : {
+      "Type" : "AWS::CloudFormation::WaitCondition",
+      "Properties" : {
+        "Timeout" : "1800",
+        "Count" : "5",
+        "Handle" : {
+          "Ref" : "C2Handle"
+        }
+      }
+    },
+    "C3" : {
+      "Type" : "AWS::CloudFormation::WaitCondition",
+      "Properties" : {
+        "Timeout" : "1800",
+        "Handle" : {
+          "Ref" : "C2Handle"
+        }
+      }
+    },
+    "C4Handle" : {
+      "Type" : "AWS::CloudFormation::WaitConditionHandle",
+      "Properties" : { }
+    },
+    "C4" : {
+      "Type" : "AWS::CloudFormation::WaitCondition",
+      "Properties" : {
+        "Timeout" : "1800",
+        "Handle" : {
+          "Ref" : "C4Handle"
+        }
+      },
+      "DependsOn" : "Dummy"
+    },
+    "C5" : {
+      "Type" : "AWS::CloudFormation::WaitCondition",
+      "Properties" : {
+        "Timeout" : "10",
+        "Count" : "2",
+        "Handle" : {
+          "Ref" : "C2Handle"
+        }
+      },
+      "DependsOn" : "Dummy"
+    },
+    "C6" : {
+      "Type" : "AWS::CloudFormation::WaitCondition",
+      "Properties" : {
+        "Timeout" : "1800",
+        "Handle" : {
+          "Ref" : "C6Handle"
+        }
+      }
+    }
+  }
+}
