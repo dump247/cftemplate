@@ -8,59 +8,96 @@ class Numeric
   end
 end
 
+# Represents a span of time.
 class Timespan
-  MILLISECONDS_PER_SECOND=1000.0
-  MILLISECONDS_PER_MINUTE=60.0 * MILLISECONDS_PER_SECOND
-  MILLISECONDS_PER_HOUR=60.0 * MILLISECONDS_PER_MINUTE
-  MILLISECONDS_PER_DAY=24.0 * MILLISECONDS_PER_HOUR
-
-  def initialize(values)
+  # Initialize a new timespan
+  # @option values [Numeric] :days (0) number of days
+  # @option values [Numeric] :hours (0) number of hours
+  # @option values [Numeric] :minutes (0) number of minutes
+  # @option values [Numeric] :seconds (0) number of seconds
+  # @option values [Numeric] :milliseconds (0) number of milliseconds
+  def initialize(values={})
     days = values.fetch(:days, 0)
     hours = values.fetch(:hours, 0) + (days * 24)
     minutes = values.fetch(:minutes, 0) + (hours * 60)
     seconds = values.fetch(:seconds, 0) + (minutes * 60)
     @total_mils = (values.fetch(:milliseconds, 0) + (seconds * 1000)).to_f
   end
-  
+
+  # Timespan of length zero.
+  ZERO=Timespan.new()
+
+  # Get the total number of days represented by this timespan
+  # @return [Float] total days
   def to_days
     @total_mils / MILLISECONDS_PER_DAY
   end
 
+  # Get the total number of hours represented by this timespan
+  # @return [Float] total hours
   def to_hours
     @total_mils / MILLISECONDS_PER_HOUR
   end
 
+  # Get the total number of minutes represented by this timespan
+  # @return [Float] total minutes
   def to_minutes
     @total_mils / MILLISECONDS_PER_MINUTE
   end
 
+  # Get the total number of seconds represented by this timespan
+  # @return [Float] total seconds
   def to_seconds
     @total_mils / MILLISECONDS_PER_SECOND
   end
 
+  # Get the total number of milliseconds represented by this timespan
+  # @return [Float] total milliseconds
   def to_milliseconds
     @total_mils
   end
 
+  # Generate a Timespan from a number of days
+  # @param value [Numeric] number of days
+  # @return [Timespan] timespan value
   def self.days(value)
     Timespan.new(:days => value)
   end
 
+  # Generate a Timespan from a number of hours
+  # @param value [Numeric] number of hours
+  # @return [Timespan] timespan value
   def self.hours(value)
     Timespan.new(:hours => value)
   end
 
+  # Generate a Timespan from a number of minutes
+  # @param value [Numeric] number of minutes
+  # @return [Timespan] timespan value
   def self.minutes(value)
     Timespan.new(:minutes => value)
   end
 
+  # Generate a Timespan from a number of seconds
+  # @param value [Numeric] number of seconds
+  # @return [Timespan] timespan value
   def self.seconds(value)
     Timespan.new(:seconds => value)
   end
 
+  # Generate a Timespan from a number of milliseconds
+  # @param value [Numeric] number of milliseconds
+  # @return [Timespan] timespan value
   def self.milliseconds(value)
     Timespan.new(:milliseconds => value)
   end
+
+  private
+  
+  MILLISECONDS_PER_SECOND=1000.0
+  MILLISECONDS_PER_MINUTE=60.0 * MILLISECONDS_PER_SECOND
+  MILLISECONDS_PER_HOUR=60.0 * MILLISECONDS_PER_MINUTE
+  MILLISECONDS_PER_DAY=24.0 * MILLISECONDS_PER_HOUR
 end
 
 module CloudFormation
