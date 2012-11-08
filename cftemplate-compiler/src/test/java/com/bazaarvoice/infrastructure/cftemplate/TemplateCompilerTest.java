@@ -53,6 +53,7 @@ public class TemplateCompilerTest {
             JsonNode expectedNode = mapper.readTree(expected);
             JsonNode actualNode = mapper.readTree(actual);
 
+            // expectedNode.equals(actualNode) works, however, do string comparison here so IntelliJ can show a decent diff view
             assertEquals(mapper.writeValueAsString(expectedNode), mapper.writeValueAsString(actualNode));
         } catch (Exception ex) {
             throw Throwables.propagate(ex);
