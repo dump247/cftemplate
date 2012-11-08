@@ -11,13 +11,23 @@ end
 class Timespan
   MILLISECONDS_PER_SECOND=1000.0
   MILLISECONDS_PER_MINUTE=60.0 * MILLISECONDS_PER_SECOND
+  MILLISECONDS_PER_HOUR=60.0 * MILLISECONDS_PER_MINUTE
+  MILLISECONDS_PER_DAY=24.0 * MILLISECONDS_PER_HOUR
 
   def initialize(values)
     days = values.fetch(:days, 0)
     hours = values.fetch(:hours, 0) + (days * 24)
     minutes = values.fetch(:minutes, 0) + (hours * 60)
     seconds = values.fetch(:seconds, 0) + (minutes * 60)
-    @total_mils = values.fetch(:milliseconds, 0) + (seconds * 1000)
+    @total_mils = (values.fetch(:milliseconds, 0) + (seconds * 1000)).to_f
+  end
+  
+  def to_days
+    @total_mils / MILLISECONDS_PER_DAY
+  end
+
+  def to_hours
+    @total_mils / MILLISECONDS_PER_HOUR
   end
 
   def to_minutes
@@ -28,12 +38,28 @@ class Timespan
     @total_mils / MILLISECONDS_PER_SECOND
   end
 
+  def to_milliseconds
+    @total_mils
+  end
+
+  def self.days(value)
+    Timespan.new(:days => value)
+  end
+
+  def self.hours(value)
+    Timespan.new(:hours => value)
+  end
+
   def self.minutes(value)
     Timespan.new(:minutes => value)
   end
 
   def self.seconds(value)
     Timespan.new(:seconds => value)
+  end
+
+  def self.milliseconds(value)
+    Timespan.new(:milliseconds => value)
   end
 end
 
