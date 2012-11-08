@@ -31,8 +31,8 @@ module CloudFormation
   #
   # @param name [String] name of the resource
   # @option options [Fixnum] :timeout (1800) Number of seconds to wait for the required number of signals.
-  # @option options [String] :resource (nil) Name of the resource to associate with the condition. This becomes the DependsOn of the resulting wait condition resource.
-  #                                          After the resource is created, CloudFormation will wait for the condition to be signaled.
+  # @option options [String] :depends (nil) Name of the resource to associate with the condition. This becomes the DependsOn of the resulting wait condition resource.
+  #                                         After the resource is created, CloudFormation will wait for the condition to be signaled.
   # @option options [Fixnum] :count (1) Number of signals to wait for.
   # @option options [String, Ref] :handle (new handle) Name of a AWS::CloudFormation::WaitConditionHandle resource.
   #                                                    If not specified, a new wait handle resource named "<name>Handle" is created if it does not already exist.
@@ -42,7 +42,7 @@ module CloudFormation
   def wait_condition(name, options={})
     location = caller()[0]
 
-    depends_on = options.delete :resource
+    depends_on = options.delete :depends
 
     properties = {
         'Timeout' => options.delete(:timeout) || 1800,
