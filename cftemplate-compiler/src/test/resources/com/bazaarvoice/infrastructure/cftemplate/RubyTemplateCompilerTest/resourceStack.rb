@@ -7,4 +7,7 @@ template '2010-09-09' do
         :timeout => 5,
         :parameters => {'InstanceType' => 't1.micro', 'KeyName' => 'mykey'},
         :depends => 'myStack'
+
+  stack 'myStack3', 'https://s3.amazonaws.com/cloudformation-templates-us-east-1/S3_Bucket.template',
+        :timeout => Timespan.minutes(5941)
 end

@@ -77,7 +77,7 @@
         "C5" : {
             "Type" : "AWS::CloudFormation::WaitCondition",
             "Properties" : {
-                "Timeout" : "10",
+                "Timeout" : "11220",
                 "Count" : "2",
                 "Handle" : {
                     "Ref" : "C2Handle"

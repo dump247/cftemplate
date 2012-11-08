@@ -8,6 +8,35 @@ class Numeric
   end
 end
 
+class Timespan
+  MILLISECONDS_PER_SECOND=1000.0
+  MILLISECONDS_PER_MINUTE=60.0 * MILLISECONDS_PER_SECOND
+
+  def initialize(values)
+    days = values.fetch(:days, 0)
+    hours = values.fetch(:hours, 0) + (days * 24)
+    minutes = values.fetch(:minutes, 0) + (hours * 60)
+    seconds = values.fetch(:seconds, 0) + (minutes * 60)
+    @total_mils = values.fetch(:milliseconds, 0) + (seconds * 1000)
+  end
+
+  def to_minutes
+    @total_mils / MILLISECONDS_PER_MINUTE
+  end
+
+  def to_seconds
+    @total_mils / MILLISECONDS_PER_SECOND
+  end
+
+  def self.minutes(value)
+    Timespan.new(:minutes => value)
+  end
+
+  def self.seconds(value)
+    Timespan.new(:seconds => value)
+  end
+end
+
 module CloudFormation
   # Generate a AWS::CloudFormation::WaitConditionHandle resource.
   # A wait condition handle has no properties or other configuration options.
@@ -27,10 +56,10 @@ module CloudFormation
   # @example Wait for 1 signal or timeout after 1800 seconds (5 minutes) and generate a WaitConditionHandle with name myWaitConditionHandle
   #     wait_condition 'myWaitCondition'
   # @example Timeout 4500 seconds after the resource Ec2Instance is created. A WaitConditionHandle with name myWaitConditionHandle is generated automatically.
-  #     wait_condition 'myWaitCondition', :timeout => 4500, :resource => 'Ec2Instance'
+  #     wait_condition 'myWaitCondition', :timeout => Timespan.seconds(4500), :resource => 'Ec2Instance'
   #
   # @param name [String] name of the resource
-  # @option options [Fixnum] :timeout (1800) Number of seconds to wait for the required number of signals.
+  # @option options [Fixnum, Timespan] :timeout (1800) Number of seconds to wait for the required number of signals.
   # @option options [String] :depends (nil) Name of the resource to associate with the condition. This becomes the DependsOn of the resulting wait condition resource.
   #                                         After the resource is created, CloudFormation will wait for the condition to be signaled.
   # @option options [Fixnum] :count (1) Number of signals to wait for.
@@ -50,6 +79,10 @@ module CloudFormation
         'Count' => options.delete(:count),
         'Handle' => options.delete(:handle)
     }.reject { |k, v| v.nil? }
+
+    if properties['Timeout'].is_a? Timespan
+      properties['Timeout'] = properties['Timeout'].to_seconds.ceil
+    end
     
     if properties.include? 'Handle'
       if properties['Handle'].is_a? String
@@ -81,12 +114,12 @@ module CloudFormation
   #     stack 'myStack', 'https://s3.amazonaws.com/cloudformation-templates-us-east-1/S3_Bucket.template'
   # @example Timeout 5 minutes with parameters
   #     stack 'myStack', 'https://s3.amazonaws.com/cloudformation-templates-us-east-1/S3_Bucket.template',
-  #           :timeout => 5,
+  #           :timeout => Timespan.minutes(5),
   #           :parameters => { 'InstanceType' => 't1.micro', 'KeyName' => 'mykey' }
   #
   # @param name [String] name of the resource
   # @param url [String] The URL of a template that specifies the stack that you want to create as a resource.
-  # @option options [Fixnum] :timeout (nil) Length of time, in minutes, to wait for the embedded stack to be created. The default is to wait forever.
+  # @option options [Fixnum, Timespan] :timeout (nil) Length of time, in minutes, to wait for the embedded stack to be created. The default is to wait forever.
   # @option options [Hash<String, String>] :parameters ({}) The set of parameter values passed to the new stack.
   # @option options [String] :depends (nil) Name of a resource that must be created before this resource.
   # @return [void]
@@ -102,6 +135,10 @@ module CloudFormation
         'TimeoutInMinutes' => options.delete(:timeout),
         'Parameters' => options.delete(:parameters)
     }.reject { |k, v| v.nil? }
+
+    if properties.include?('TimeoutInMinutes') && properties['TimeoutInMinutes'].is_a?(Timespan)
+      properties['TimeoutInMinutes'] = properties['TimeoutInMinutes'].to_minutes.ceil
+    end
 
     if properties.include?('Parameters') && properties['Parameters'].empty?
       properties.delete 'Parameters'
