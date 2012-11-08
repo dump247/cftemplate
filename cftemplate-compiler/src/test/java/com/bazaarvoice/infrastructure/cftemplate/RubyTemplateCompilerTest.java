@@ -191,4 +191,9 @@ public class RubyTemplateCompilerTest extends TemplateCompilerTest {
     public void testCompile_stack_resource_utility() {
         assertCompile("resourceStack");
     }
+
+    @Test
+    public void testCompile_iam_instance_profile_utility() {
+        assertCompile("resourceIamProfile");
+    }
 }

@@ -44,7 +44,7 @@
         "C2" : {
             "Type" : "AWS::CloudFormation::WaitCondition",
             "Properties" : {
-                "Timeout" : "1800",
+                "Timeout" : "1",
                 "Count" : "5",
                 "Handle" : {
                     "Ref" : "C2Handle"

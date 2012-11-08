@@ -6,6 +6,26 @@ class Numeric
   def to_ordinal
     (10...20) === self ? "#{self}th" : self.to_s + %w{ th st nd rd th th th th th th }[self.to_s[-1..-1].to_i]
   end
+
+  def days
+    Timespan.new(:days => self)
+  end
+
+  def hours
+    Timespan.new(:hours => self)
+  end
+
+  def minutes
+    Timespan.new(:minutes => self)
+  end
+
+  def seconds
+    Timespan.new(:seconds => self)
+  end
+
+  def milliseconds
+    Timespan.new(:milliseconds => self)
+  end
 end
 
 # Represents a span of time.
@@ -57,41 +77,6 @@ class Timespan
     @total_mils
   end
 
-  # Generate a Timespan from a number of days
-  # @param value [Numeric] number of days
-  # @return [Timespan] timespan value
-  def self.days(value)
-    Timespan.new(:days => value)
-  end
-
-  # Generate a Timespan from a number of hours
-  # @param value [Numeric] number of hours
-  # @return [Timespan] timespan value
-  def self.hours(value)
-    Timespan.new(:hours => value)
-  end
-
-  # Generate a Timespan from a number of minutes
-  # @param value [Numeric] number of minutes
-  # @return [Timespan] timespan value
-  def self.minutes(value)
-    Timespan.new(:minutes => value)
-  end
-
-  # Generate a Timespan from a number of seconds
-  # @param value [Numeric] number of seconds
-  # @return [Timespan] timespan value
-  def self.seconds(value)
-    Timespan.new(:seconds => value)
-  end
-
-  # Generate a Timespan from a number of milliseconds
-  # @param value [Numeric] number of milliseconds
-  # @return [Timespan] timespan value
-  def self.milliseconds(value)
-    Timespan.new(:milliseconds => value)
-  end
-
   private
   
   MILLISECONDS_PER_SECOND=1000.0
@@ -108,7 +93,7 @@ module CloudFormation
   #     wait_condition_handle 'myWaitHandle'
   #
   # @param name [String] name of the resource
-  # @return [void]
+  # @return [Hash] "Ref" => name
   # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-waitconditionhandle.html AWS::CloudFormation::WaitConditionHandle
   def wait_condition_handle(name)
     resource name, 'AWS::CloudFormation::WaitConditionHandle'
@@ -116,29 +101,37 @@ module CloudFormation
 
   # Generate a AWS::CloudFormation::WaitCondition resource.
   #
-  # @example Wait for 1 signal or timeout after 1800 seconds (5 minutes) and generate a WaitConditionHandle with name myWaitConditionHandle
-  #     wait_condition 'myWaitCondition'
-  # @example Timeout 4500 seconds after the resource Ec2Instance is created. A WaitConditionHandle with name myWaitConditionHandle is generated automatically.
-  #     wait_condition 'myWaitCondition', :timeout => Timespan.seconds(4500), :resource => 'Ec2Instance'
+  # @example Wait for 1 signal or timeout after 1800 seconds (5 minutes) and generate a WaitConditionHandle named myWaitConditionHandle
+  #     wait_condition 'myWaitCondition', 1800
+  # @example Timeout 30 minutes after the resource Ec2Instance is created and use existing WaitConditionHandle myWaitHandle
+  #     wait_condition 'myWaitCondition', 30.minutes,
+  #                    :resource => 'Ec2Instance',
+  #                    :handle => 'myWaitHandle'
   #
   # @param name [String] name of the resource
-  # @option options [Fixnum, Timespan] :timeout (1800) Number of seconds to wait for the required number of signals.
-  # @option options [String] :depends (nil) Name of the resource to associate with the condition. This becomes the DependsOn of the resulting wait condition resource.
-  #                                         After the resource is created, CloudFormation will wait for the condition to be signaled.
+  # @param timeout [Fixnum, Timespan] Number of seconds to wait for the required number of signals.
   # @option options [Fixnum] :count (1) Number of signals to wait for.
   # @option options [String, Ref] :handle (new handle) Name of a AWS::CloudFormation::WaitConditionHandle resource.
   #                                                    If not specified, a new wait handle resource named "<name>Handle" is created if it does not already exist.
   #                                                    This can be either a resource name string or a Ref function result.
-  # @return [void]
+  # @option options [String] :depends (nil) Name of the resource to associate with the condition. This becomes the DependsOn of the resulting wait condition resource.
+  #                                         After the resource is created, CloudFormation will wait for the condition to be signaled.
+  # @option options [Hash] :metadata (nil) Metadata to associate with the resource
+  # @return [Hash] "Ref" => name
   #
   # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-waitcondition.html AWS::CloudFormation::WaitCondition
-  def wait_condition(name, options={})
+  def wait_condition(name, timeout, options={})
     location = caller()[0]
 
+    if timeout.is_a? Timespan
+      timeout = timeout.to_seconds.ceil
+    end
+
     depends_on = options.delete :depends
+    metadata = options.delete :metadata
 
     properties = {
-        'Timeout' => options.delete(:timeout) || 1800,
+        'Timeout' => timeout,
         'Count' => options.delete(:count),
         'Handle' => options.delete(:handle)
     }.reject { |k, v| v.nil? }
@@ -167,17 +160,18 @@ module CloudFormation
 
     resource name, 'AWS::CloudFormation::WaitCondition', {
         'Properties' => properties,
-        'DependsOn' => depends_on
-    }.reject { |k, v| v.nil? }
+        'DependsOn' => depends_on,
+        'Metadata' => metadata
+    }.reject { |k, v| v.nil? || (v.is_a?(Hash) && v.empty?) }
   end
 
   # Generate a AWS::CloudFormation::Stack resource.
   #
   # @example No timeout
   #     stack 'myStack', 'https://s3.amazonaws.com/cloudformation-templates-us-east-1/S3_Bucket.template'
-  # @example Timeout 5 minutes with parameters
+  # @example Timeout 1 hour with parameters
   #     stack 'myStack', 'https://s3.amazonaws.com/cloudformation-templates-us-east-1/S3_Bucket.template',
-  #           :timeout => Timespan.minutes(5),
+  #           :timeout => 1.hours,
   #           :parameters => { 'InstanceType' => 't1.micro', 'KeyName' => 'mykey' }
   #
   # @param name [String] name of the resource
@@ -185,13 +179,15 @@ module CloudFormation
   # @option options [Fixnum, Timespan] :timeout (nil) Length of time, in minutes, to wait for the embedded stack to be created. The default is to wait forever.
   # @option options [Hash<String, String>] :parameters ({}) The set of parameter values passed to the new stack.
   # @option options [String] :depends (nil) Name of a resource that must be created before this resource.
-  # @return [void]
+  # @option options [Hash] :metadata (nil) Metadata to associate with the resource
+  # @return [Hash] "Ref" => name
   #
   # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-stack.html AWS::CloudFormation::Stack
   def stack(name, url, options={})
     location = caller()[0]
 
     depends_on = options.delete :depends
+    metadata = options.delete :metadata
 
     properties = {
         'TemplateURL' => url,
@@ -213,8 +209,43 @@ module CloudFormation
 
     resource name, 'AWS::CloudFormation::Stack', {
         'Properties' => properties,
-        'DependsOn' => depends_on
+        'DependsOn' => depends_on,
+        'Metadata' => metadata
+    }.reject { |k, v| v.nil? || (v.is_a?(Hash) && v.empty?) }
+  end
+end
+
+module Iam
+  # Generate an AWS::IAM::InstanceProfile resource.
+  #
+  # @param name [String] Name of the resource.
+  # @param path [String] Path associated with the instance profile.
+  # @param role [String] Name of the AWS::IAM::Role resource associated with this profile
+  # @option options [String] :depends (nil) Name of a resource that must be created before this resource.
+  # @option options [Hash] :metadata (nil) Metadata to associate with the resource
+  # @return [Hash] "Ref" => name
+  #
+  # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-instanceprofile.html AWS::IAM::InstanceProfile
+  def iam_instance_profile(name, path, role, options={})
+    location = caller()[0]
+
+    depends_on = options.delete :depends
+    metadata = options.delete :metadata
+
+    properties = {
+        'Path' => path,
+        'Roles' => [ role.is_a?(String) ? ref(role) : role ]
     }.reject { |k, v| v.nil? }
+
+    if not options.empty?
+      $cftemplate_output.error(location, "Unknown options for wait condition: #{options}")
+    end
+
+    resource name, 'AWS::IAM::InstanceProfile', {
+        'Properties' => properties,
+        'DependsOn' => depends_on,
+        'Metadata' => metadata
+    }.reject { |k, v| v.nil? || (v.is_a?(Hash) && v.empty?) }
   end
 end
 
@@ -416,6 +447,7 @@ end
 class TemplateV1
   include Fn
   include CloudFormation
+  include Iam
 
   VERSION='2010-09-09'
 
@@ -544,11 +576,17 @@ class TemplateV1
       resource = clean_obj(options.merge('Type' => type))
     end
 
-    if not resources.include?(name)
-      resources[name] = resource
-    end
+    if name.nil?
+      return resource
+    else
+      if not resources.include?(name)
+        resources[name] = resource
+      end
 
-    $cftemplate_output.addResource(location, name, resource)
+      $cftemplate_output.addResource(location, name, resource)
+
+      return ref(name)
+    end
   end
 
   def output(name, value, description='')
