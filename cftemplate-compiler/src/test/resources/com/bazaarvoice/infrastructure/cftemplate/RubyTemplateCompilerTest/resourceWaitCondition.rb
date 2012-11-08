@@ -2,9 +2,9 @@ require 'cftemplate'
 
 template '2010-09-09' do
   resource 'Dummy', 'AWS::CloudFormation::Stack',
-      'Properties' => {
-          'TemplateURL' => 'http://localhost/no.template'
-      }
+           'Properties' => {
+               'TemplateURL' => 'http://localhost/no.template'
+           }
 
   wait_condition_handle 'C6Handle'
 
