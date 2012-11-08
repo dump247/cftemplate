@@ -1,0 +1,23 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Resources" : {
+        "myStack" : {
+            "Type" : "AWS::CloudFormation::Stack",
+            "Properties" : {
+                "TemplateURL" : "https://s3.amazonaws.com/cloudformation-templates-us-east-1/S3_Bucket.template"
+            }
+        },
+        "myStack2" : {
+            "Type" : "AWS::CloudFormation::Stack",
+            "Properties" : {
+                "TemplateURL" : "https://s3.amazonaws.com/cloudformation-templates-us-east-1/S3_Bucket.template",
+                "TimeoutInMinutes" : "5",
+                "Parameters" : {
+                    "InstanceType" : "t1.micro",
+                    "KeyName" : "mykey"
+                }
+            },
+            "DependsOn" : "myStack"
+        }
+    }
+}

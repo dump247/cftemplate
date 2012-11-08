@@ -186,4 +186,9 @@ public class RubyTemplateCompilerTest extends TemplateCompilerTest {
     public void testCompile_wait_condition_resource_utility() {
         assertCompile("resourceWaitCondition");
     }
+
+    @Test
+    public void testCompile_stack_resource_utility() {
+        assertCompile("resourceStack");
+    }
 }

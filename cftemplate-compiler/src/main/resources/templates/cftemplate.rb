@@ -38,6 +38,7 @@ module CloudFormation
   #                                                    If not specified, a new wait handle resource named "<name>Handle" is created if it does not already exist.
   #                                                    This can be either a resource name string or a Ref function result.
   # @return [void]
+  #
   # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-waitcondition.html AWS::CloudFormation::WaitCondition
   def wait_condition(name, options={})
     location = caller()[0]
@@ -69,6 +70,48 @@ module CloudFormation
     end
 
     resource name, 'AWS::CloudFormation::WaitCondition', {
+        'Properties' => properties,
+        'DependsOn' => depends_on
+    }.reject { |k, v| v.nil? }
+  end
+
+  # Generate a AWS::CloudFormation::Stack resource.
+  #
+  # @example No timeout
+  #     stack 'myStack', 'https://s3.amazonaws.com/cloudformation-templates-us-east-1/S3_Bucket.template'
+  # @example Timeout 5 minutes with parameters
+  #     stack 'myStack', 'https://s3.amazonaws.com/cloudformation-templates-us-east-1/S3_Bucket.template',
+  #           :timeout => 5,
+  #           :parameters => { 'InstanceType' => 't1.micro', 'KeyName' => 'mykey' }
+  #
+  # @param name [String] name of the resource
+  # @param url [String] The URL of a template that specifies the stack that you want to create as a resource.
+  # @option options [Fixnum] :timeout (nil) Length of time, in minutes, to wait for the embedded stack to be created. The default is to wait forever.
+  # @option options [Hash<String, String>] :parameters ({}) The set of parameter values passed to the new stack.
+  # @option options [String] :depends (nil) Name of a resource that must be created before this resource.
+  # @return [void]
+  #
+  # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-stack.html AWS::CloudFormation::Stack
+  def stack(name, url, options={})
+    location = caller()[0]
+
+    depends_on = options.delete :depends
+
+    properties = {
+        'TemplateURL' => url,
+        'TimeoutInMinutes' => options.delete(:timeout),
+        'Parameters' => options.delete(:parameters)
+    }.reject { |k, v| v.nil? }
+
+    if properties.include?('Parameters') && properties['Parameters'].empty?
+      properties.delete 'Parameters'
+    end
+
+    if not options.empty?
+      $cftemplate_output.error(location, "Unknown options for wait condition: #{options}")
+    end
+
+    resource name, 'AWS::CloudFormation::Stack', {
         'Properties' => properties,
         'DependsOn' => depends_on
     }.reject { |k, v| v.nil? }
