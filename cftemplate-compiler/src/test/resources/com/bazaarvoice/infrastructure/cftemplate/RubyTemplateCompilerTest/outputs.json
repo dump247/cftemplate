@@ -1,0 +1,26 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Resources" : {
+        "Dummy" : {
+            "Type" : "AWS::CloudFormation::WaitConditionHandle",
+            "Properties" : { }
+        }
+    },
+    "Outputs" : {
+        "Output1" : {
+            "Value" : {
+                "Ref" : "OutputRef"
+            }
+        },
+        "Output2" : {
+            "Value" : "OutputValue"
+        },
+        "OutputA" : {
+            "Description" : "Description for output a",
+            "Value" : "OutputValue"
+        },
+        "ArrayOutput" : {
+            "Value" : [ "a", "b" ]
+        }
+    }
+}

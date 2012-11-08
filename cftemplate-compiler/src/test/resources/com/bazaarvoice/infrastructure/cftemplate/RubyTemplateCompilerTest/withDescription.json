@@ -1,0 +1,10 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Description" : "This is the description",
+    "Resources" : {
+        "Dummy" : {
+            "Type" : "AWS::CloudFormation::WaitConditionHandle",
+            "Properties" : { }
+        }
+    }
+}

@@ -1,0 +1,29 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Resources" : {
+        "Dummy" : {
+            "Type" : "AWS::CloudFormation::WaitConditionHandle",
+            "Properties" : { }
+        }
+    },
+    "Outputs" : {
+        "EmptyFile" : {
+            "Value" : ""
+        },
+        "NoVariables" : {
+            "Value" : "This is some\ncontent\nto include\nin the\n\"output\"\nwith some braces: {}\nbut no double braces"
+        },
+        "WithVariables" : {
+            "Value" : {
+                "Fn::Join" : [ "", [ "This template includes ", {
+                    "Ref" : "SomeRef"
+                }, " some variables that\nare interpolated\ninto the content ", {
+                    "Ref" : "SomeRef"
+                }, "\n" ] ]
+            }
+        },
+        "NoInterpolation" : {
+            "Value" : "This template includes {{ref('SomeRef')}} some variables that\nare interpolated\ninto the content {{ref('SomeRef')}}\n"
+        }
+    }
+}

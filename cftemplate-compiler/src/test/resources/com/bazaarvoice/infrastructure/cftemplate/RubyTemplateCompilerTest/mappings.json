@@ -1,0 +1,25 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Mappings" : {
+        "MappingA" : {
+            "Map1" : {
+                "Key1" : "Value1"
+            },
+            "Map2" : {
+                "Key1" : "Value2",
+                "Key2" : [ "A", "B", "c" ]
+            }
+        },
+        "Mapping1" : {
+            "MapA" : {
+                "KeyA" : "ValueA"
+            }
+        }
+    },
+    "Resources" : {
+        "Dummy" : {
+            "Type" : "AWS::CloudFormation::WaitConditionHandle",
+            "Properties" : { }
+        }
+    }
+}

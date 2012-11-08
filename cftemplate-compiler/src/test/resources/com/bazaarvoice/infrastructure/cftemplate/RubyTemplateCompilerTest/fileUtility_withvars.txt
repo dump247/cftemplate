@@ -1,0 +1,3 @@
+This template includes {{ref('SomeRef')}} some variables that
+are interpolated
+into the content {{ref('SomeRef')}}

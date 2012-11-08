@@ -1,0 +1,32 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Parameters" : {
+        "P1" : {
+            "Type" : "String",
+            "NoEcho" : "TRUE"
+        },
+        "P2" : {
+            "Type" : "String",
+            "NoEcho" : "TRUE"
+        },
+        "P3" : {
+            "Type" : "String"
+        },
+        "P4" : {
+            "Type" : "String"
+        },
+        "P5" : {
+            "Type" : "String"
+        },
+        "P6" : {
+            "Type" : "String",
+            "NoEcho" : "TRUE"
+        }
+    },
+    "Resources" : {
+        "Dummy" : {
+            "Type" : "AWS::CloudFormation::WaitConditionHandle",
+            "Properties" : { }
+        }
+    }
+}

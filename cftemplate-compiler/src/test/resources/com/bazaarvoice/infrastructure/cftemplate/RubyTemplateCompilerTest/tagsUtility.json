@@ -1,0 +1,98 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Resources" : {
+        "Dummy" : {
+            "Type" : "AWS::CloudFormation::WaitConditionHandle",
+            "Properties" : { }
+        }
+    },
+    "Outputs" : {
+        "EmptyTags" : {
+            "Value" : [ ]
+        },
+        "SingleTag" : {
+            "Value" : [
+                {
+                    "Key" : "A",
+                    "Value" : "B"
+                }
+            ]
+        },
+        "MultiTag" : {
+            "Value" : [
+                {
+                    "Key" : "A",
+                    "Value" : "B"
+                },
+                {
+                    "Key" : "C",
+                    "Value" : "D"
+                }
+            ]
+        },
+        "Propagate" : {
+            "Value" : [
+                {
+                    "PropagateAtLaunch" : "true",
+                    "Key" : "A",
+                    "Value" : "B"
+                },
+                {
+                    "PropagateAtLaunch" : "true",
+                    "Key" : "C",
+                    "Value" : "D"
+                }
+            ]
+        },
+        "DontPropagate" : {
+            "Value" : [
+                {
+                    "Key" : "A",
+                    "Value" : "B"
+                },
+                {
+                    "Key" : "C",
+                    "Value" : "D"
+                }
+            ]
+        },
+        "PropagateTag" : {
+            "Value" : [
+                {
+                    "Key" : "A",
+                    "Value" : "B"
+                },
+                {
+                    "Value" : "D",
+                    "Key" : "C"
+                },
+                {
+                    "PropagateAtLaunch" : "true",
+                    "Value" : "F",
+                    "Key" : "E"
+                },
+                {
+                    "Value" : "H",
+                    "Key" : "G"
+                }
+            ]
+        },
+        "TagsArray" : {
+            "Value" : [
+                {
+                    "Key" : "A",
+                    "Value" : "B"
+                },
+                {
+                    "PropagateAtLaunch" : "true",
+                    "Key" : "C",
+                    "Value" : "D"
+                },
+                {
+                    "Key" : "E",
+                    "Value" : "F"
+                }
+            ]
+        }
+    }
+}

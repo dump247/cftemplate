@@ -1,0 +1,52 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Parameters" : {
+        "P1" : {
+            "Type" : "String",
+            "MinLength" : "10"
+        },
+        "P2" : {
+            "Type" : "String",
+            "MinLength" : "10"
+        },
+        "P3" : {
+            "Type" : "String",
+            "MaxLength" : "10"
+        },
+        "P4" : {
+            "Type" : "String",
+            "MaxLength" : "10"
+        },
+        "P5" : {
+            "Type" : "String",
+            "MinLength" : "0",
+            "MaxLength" : "2147483647"
+        },
+        "P6" : {
+            "Type" : "String",
+            "MinLength" : "10",
+            "MaxLength" : "10"
+        },
+        "P7" : {
+            "Type" : "String",
+            "MinLength" : "100",
+            "MaxLength" : "100"
+        },
+        "P8" : {
+            "Type" : "String",
+            "MinLength" : "10",
+            "MaxLength" : "100"
+        },
+        "P9" : {
+            "Type" : "String",
+            "MinLength" : "10",
+            "MaxLength" : "99"
+        }
+    },
+    "Resources" : {
+        "Dummy" : {
+            "Type" : "AWS::CloudFormation::WaitConditionHandle",
+            "Properties" : { }
+        }
+    }
+}

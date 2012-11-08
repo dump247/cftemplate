@@ -1,0 +1,75 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Parameters" : {
+        "P1" : {
+            "Type" : "Number",
+            "MinValue" : "10"
+        },
+        "P2" : {
+            "Type" : "Number",
+            "MinValue" : "10"
+        },
+        "P3" : {
+            "Type" : "Number",
+            "MaxValue" : "-10"
+        },
+        "P4" : {
+            "Type" : "Number",
+            "MaxValue" : "-10"
+        },
+        "P5" : {
+            "Type" : "Number",
+            "MinValue" : "0",
+            "MaxValue" : "2147483647"
+        },
+        "P6" : {
+            "Type" : "Number",
+            "MinValue" : "-10",
+            "MaxValue" : "10"
+        },
+        "P7" : {
+            "Type" : "Number",
+            "MinValue" : "10",
+            "MaxValue" : "100"
+        },
+        "P8" : {
+            "Type" : "Number",
+            "MinValue" : "-10",
+            "MaxValue" : "99"
+        },
+        "P9" : {
+            "Type" : "Number",
+            "MinValue" : "1.0"
+        },
+        "P10" : {
+            "Type" : "Number",
+            "MinValue" : "1.0"
+        },
+        "P11" : {
+            "Type" : "Number",
+            "MaxValue" : "-10.0"
+        },
+        "P12" : {
+            "Type" : "Number",
+            "MaxValue" : "-10.0"
+        },
+        "P13" : {
+            "Type" : "Number",
+            "Default" : "900",
+            "MinValue" : "0.0",
+            "MaxValue" : "900"
+        },
+        "P14" : {
+            "Type" : "Number",
+            "Default" : "-10",
+            "MinValue" : "-10",
+            "MaxValue" : "10"
+        }
+    },
+    "Resources" : {
+        "Dummy" : {
+            "Type" : "AWS::CloudFormation::WaitConditionHandle",
+            "Properties" : { }
+        }
+    }
+}

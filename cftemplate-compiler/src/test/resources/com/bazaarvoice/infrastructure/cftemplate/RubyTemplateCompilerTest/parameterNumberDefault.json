@@ -1,0 +1,123 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Parameters" : {
+        "P1" : {
+            "Type" : "Number",
+            "Default" : "1"
+        },
+        "P2" : {
+            "Type" : "Number",
+            "Default" : "-1"
+        },
+        "P3" : {
+            "Type" : "Number",
+            "Default" : "0"
+        },
+        "P4" : {
+            "Type" : "Number",
+            "Default" : "2147483647"
+        },
+        "P5" : {
+            "Type" : "Number",
+            "Default" : "1"
+        },
+        "P6" : {
+            "Type" : "Number",
+            "Default" : "-1"
+        },
+        "P7" : {
+            "Type" : "Number",
+            "Default" : "0"
+        },
+        "P8" : {
+            "Type" : "Number",
+            "Default" : "2147483647"
+        },
+        "P9" : {
+            "Type" : "Number",
+            "Default" : "1.0"
+        },
+        "P10" : {
+            "Type" : "Number",
+            "Default" : "-1.0"
+        },
+        "P11" : {
+            "Type" : "Number",
+            "Default" : "0.0"
+        },
+        "P12" : {
+            "Type" : "Number",
+            "Default" : "1.0"
+        },
+        "P13" : {
+            "Type" : "Number",
+            "Default" : "-1.0"
+        },
+        "P14" : {
+            "Type" : "Number",
+            "Default" : "0.0"
+        },
+        "P15" : {
+            "Type" : "Number",
+            "Default" : "1"
+        },
+        "P16" : {
+            "Type" : "Number",
+            "Default" : "-1"
+        },
+        "P17" : {
+            "Type" : "Number",
+            "Default" : "0"
+        },
+        "P18" : {
+            "Type" : "Number",
+            "Default" : "2147483647"
+        },
+        "P19" : {
+            "Type" : "Number",
+            "Default" : "1"
+        },
+        "P20" : {
+            "Type" : "Number",
+            "Default" : "-1"
+        },
+        "P21" : {
+            "Type" : "Number",
+            "Default" : "0"
+        },
+        "P22" : {
+            "Type" : "Number",
+            "Default" : "2147483647"
+        },
+        "P23" : {
+            "Type" : "Number",
+            "Default" : "1.0"
+        },
+        "P24" : {
+            "Type" : "Number",
+            "Default" : "-1.0"
+        },
+        "P25" : {
+            "Type" : "Number",
+            "Default" : "0.0"
+        },
+        "P26" : {
+            "Type" : "Number",
+            "Default" : "1.0"
+        },
+        "P27" : {
+            "Type" : "Number",
+            "Default" : "-1.0"
+        },
+        "P28" : {
+            "Type" : "Number",
+            "Default" : "0.0"
+        }
+    },
+    "Resources" : {
+        "Dummy" : {
+            "Type" : "AWS::CloudFormation::WaitConditionHandle",
+            "Properties" : { }
+        }
+    }
+}

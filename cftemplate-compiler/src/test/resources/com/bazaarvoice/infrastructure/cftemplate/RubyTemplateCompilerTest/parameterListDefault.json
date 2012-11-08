@@ -1,0 +1,65 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Parameters" : {
+        "P1" : {
+            "Type" : "CommaDelimitedList",
+            "Default" : ""
+        },
+        "P2" : {
+            "Type" : "CommaDelimitedList",
+            "Default" : "a"
+        },
+        "P3" : {
+            "Type" : "CommaDelimitedList",
+            "Default" : "a, b"
+        },
+        "P4" : {
+            "Type" : "CommaDelimitedList",
+            "Default" : "a, b"
+        },
+        "P5" : {
+            "Type" : "CommaDelimitedList"
+        },
+        "P6" : {
+            "Type" : "CommaDelimitedList",
+            "Default" : "a"
+        },
+        "P7" : {
+            "Type" : "CommaDelimitedList",
+            "Default" : "a, b"
+        },
+        "P8" : {
+            "Type" : "CommaDelimitedList",
+            "Default" : ""
+        },
+        "P9" : {
+            "Type" : "CommaDelimitedList",
+            "Default" : "a"
+        },
+        "P10" : {
+            "Type" : "CommaDelimitedList",
+            "Default" : "a, b"
+        },
+        "P11" : {
+            "Type" : "CommaDelimitedList",
+            "Default" : "a, b"
+        },
+        "P12" : {
+            "Type" : "CommaDelimitedList"
+        },
+        "P13" : {
+            "Type" : "CommaDelimitedList",
+            "Default" : "a"
+        },
+        "P14" : {
+            "Type" : "CommaDelimitedList",
+            "Default" : "a, b"
+        }
+    },
+    "Resources" : {
+        "Dummy" : {
+            "Type" : "AWS::CloudFormation::WaitConditionHandle",
+            "Properties" : { }
+        }
+    }
+}

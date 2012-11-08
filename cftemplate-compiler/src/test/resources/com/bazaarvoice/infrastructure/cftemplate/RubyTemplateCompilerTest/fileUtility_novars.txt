@@ -1,0 +1,7 @@
+This is some
+content
+to include
+in the
+"output"
+with some braces: {}
+but no double braces
