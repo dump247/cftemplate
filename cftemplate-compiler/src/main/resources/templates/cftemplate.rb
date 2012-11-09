@@ -282,14 +282,15 @@ module Route53
   # Generate AWS::Route53::RecordSet resource properties.
   #
   # @example RecordSet using HostedZoneId
-  #     Route53.RecordSet :cname, 'mysite.example.com.',
-  #                        :hosted_zone_id => '/hostedzone/Z3DG6IL3SJCGPX',
-  #                        :comment => 'CNAME for my frontends.',
-  #                        :ttl => 15.minutes,
-  #                        :records => [ get_att('myLB', 'DNSName') ]
+  #     Route53.RecordSet :type => :CNAME,
+  #                       :domain => 'mysite.example.com.',
+  #                       :hosted_zone_id => '/hostedzone/Z3DG6IL3SJCGPX',
+  #                       :comment => 'CNAME for my frontends.',
+  #                       :ttl => 15.minutes,
+  #                       :records => [ get_att('myLB', 'DNSName') ]
   #
-  # @param type [String, Symbol] Type of records to add. Valid values: :a, :aaaa, :cname, :mx, :ns, :ptr, :soa, :spf, :srv, :txt
-  # @param domain [String] The name of the domain.
+  # @option options [String, Symbol] :type Type of records to add. Valid values: :A, :AAAA, :CNAME, :MX, :NS, :PTR, :SOA, :SPF, :SRV, :TXT
+  # @option options [String] :domain The name of the domain.
   #     This must be a fully-specified domain, ending with a period as the last label indication.
   #     If you omit the final period, Amazon Route 53 assumes the domain is relative to the root.
   # @option options [String] :id A unique identifier that differentiates among multiple resource record sets that have the same combination of DNS name and type.
@@ -314,19 +315,30 @@ module Route53
   # @return [Hash] record set properties
   #
   # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-route53-recordset.html AWS::Route53::RecordSet
-  def self.RecordSet(type, domain, options={})
+  def self.RecordSet(options={})
+    type = options.fetch(:type)
+    ttl = options.fetch(:ttl, nil)
+
+    if type.is_a?(String) || type.is_a?(Symbol)
+      type = type.to_s.upcase
+    end
+
+    if not ttl.is_a?(Hash)
+      ttl = Timespan.parse_seconds_i(ttl)
+    end
+
     return {}.merge_not_empty(
-        'Type' => type.to_s.upcase,
-        'Name' => domain,
-        'SetIdentifier' => options.delete(:id),
-        'Comment' => options.delete(:comment),
-        'Region' => options.delete(:region),
-        'HostedZoneId' => options.delete(:hosted_zone_id),
-        'HostedZoneName' => options.delete(:hosted_zone_name),
-        'ResourceRecords' => options.delete(:records),
-        'TTL' => Timespan.parse_seconds_i(options.delete(:ttl)),
-        'Weight' => options.delete(:weight),
-        'AliasTarget' => options.delete(:alias_target)
+        'Type' => type,
+        'Name' => options.fetch(:domain),
+        'SetIdentifier' => options.fetch(:id, nil),
+        'Comment' => options.fetch(:comment, nil),
+        'Region' => options.fetch(:region, nil),
+        'HostedZoneId' => options.fetch(:hosted_zone_id, nil),
+        'HostedZoneName' => options.fetch(:hosted_zone_name, nil),
+        'ResourceRecords' => options.fetch(:records, nil),
+        'TTL' => ttl,
+        'Weight' => options.fetch(:weight, nil),
+        'AliasTarget' => options.fetch(:alias_target, nil)
     )
   end
 
@@ -348,15 +360,17 @@ module Route53
   # Add a AWS::Route53::RecordSet resource to the template.
   #
   # @example Adding RecordSet using HostedZoneId
-  #     route53_record_set 'myDNSRecord', :cname, 'mysite.example.com.',
+  #     route53_record_set 'myDNSRecord',
+  #                        :type => :CNAME,
+  #                        :domain => 'mysite.example.com.',
   #                        :hosted_zone_id => '/hostedzone/Z3DG6IL3SJCGPX',
   #                        :comment => 'CNAME for my frontends.',
   #                        :ttl => 15.minutes,
   #                        :records => [ get_att('myLB', 'DNSName') ]
   #
   # @param name [String] Name of the resource.
-  # @param type [String, Symbol] Type of records to add. Valid values: :a, :aaaa, :cname, :mx, :ns, :ptr, :soa, :spf, :srv, :txt
-  # @param domain [String] The name of the domain.
+  # @option options [String, Symbol] :type Type of records to add. Valid values: :A, :AAAA, :CNAME, :MX, :NS, :PTR, :SOA, :SPF, :SRV, :TXT
+  # @option options [String] :domain The name of the domain.
   #     This must be a fully-specified domain, ending with a period as the last label indication.
   #     If you omit the final period, Amazon Route 53 assumes the domain is relative to the root.
   # @option options [String] :id A unique identifier that differentiates among multiple resource record sets that have the same combination of DNS name and type.
@@ -380,15 +394,15 @@ module Route53
   # @option options [String] :depends Name of a resource that must be created before this resource.
   # @option options [Hash] :metadata Metadata to associate with the resource
   #
-  # @return [Hash] "Ref" => name
+  # @return [Hash] { "Ref" => name }
   #
   # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-route53-recordset.html AWS::Route53::RecordSet
-  def route53_record_set(name, type, domain, options={})
+  def route53_record_set(name, options={})
     depends_on = options.delete :depends
     metadata = options.delete :metadata
 
     resource name, 'AWS::Route53::RecordSet', {}.merge_not_empty(
-        'Properties' => Route53.RecordSet(type, domain, options),
+        'Properties' => Route53.RecordSet(options),
         'DependsOn' => depends_on,
         'Metadata' => metadata
     )
