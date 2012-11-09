@@ -11,21 +11,31 @@ class Numeric
     Timespan.new(:days => self)
   end
 
+  alias :day :days
+
   def hours
     Timespan.new(:hours => self)
   end
+
+  alias :hour :hours
 
   def minutes
     Timespan.new(:minutes => self)
   end
 
+  alias :minute :minutes
+
   def seconds
     Timespan.new(:seconds => self)
   end
 
+  alias :second :seconds
+
   def milliseconds
     Timespan.new(:milliseconds => self)
   end
+
+  alias :millisecond :milliseconds
 end
 
 # Monkey patching for Hash class.
