@@ -315,7 +315,7 @@ module Route53
   # @return [Hash] record set properties
   #
   # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-route53-recordset.html AWS::Route53::RecordSet
-  def self.RecordSet(options={})
+  def self.record_set(options={})
     type = options.fetch(:type)
     ttl = options.fetch(:ttl, nil)
 
@@ -402,7 +402,7 @@ module Route53
     metadata = options.delete :metadata
 
     resource name, 'AWS::Route53::RecordSet', {}.merge_not_empty(
-        'Properties' => Route53.RecordSet(options),
+        'Properties' => Route53.record_set(options),
         'DependsOn' => depends_on,
         'Metadata' => metadata
     )
