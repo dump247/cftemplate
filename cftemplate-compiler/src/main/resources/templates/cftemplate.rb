@@ -310,7 +310,7 @@ module Route53
   #     Required if you are creating a weighted resource record set.
   # @option options [Hash] :alias_target Information about the domain to which you are redirecting traffic.
   #     Required if you are creating an alias resource record set.
-  #     See {AliasTarget}
+  #     See {alias_target}
   #
   # @return [Hash] record set properties
   #
@@ -390,7 +390,7 @@ module Route53
   #     Required if you are creating a weighted resource record set.
   # @option options [Hash] :alias_target Information about the domain to which you are redirecting traffic.
   #     Required if you are creating an alias resource record set.
-  #     See {AliasTarget}
+  #     See {alias_target}
   # @option options [String] :depends Name of a resource that must be created before this resource.
   # @option options [Hash] :metadata Metadata to associate with the resource
   #
