@@ -28,6 +28,15 @@ class Numeric
   end
 end
 
+# Monkey patching for Hash class.
+class Hash
+  def merge_not_empty(values)
+    merge(values.reject { |k, v|
+      v.nil? || (v.is_a?(String) && v.empty?) || (v.is_a?(Hash) && v.empty?) || (v.is_a?(Array) && v.empty?)
+    })
+  end
+end
+
 # Represents a span of time.
 class Timespan
   # Initialize a new timespan
@@ -77,8 +86,18 @@ class Timespan
     @total_mils
   end
 
+  def self.parse_seconds_i(value)
+    if value.nil?
+      return nil
+    elsif value.is_a? Timespan
+      value.to_seconds.ceil
+    else
+      value.ceil
+    end
+  end
+
   private
-  
+
   MILLISECONDS_PER_SECOND=1000.0
   MILLISECONDS_PER_MINUTE=60.0 * MILLISECONDS_PER_SECOND
   MILLISECONDS_PER_HOUR=60.0 * MILLISECONDS_PER_MINUTE
@@ -139,7 +158,7 @@ module CloudFormation
     if properties['Timeout'].is_a? Timespan
       properties['Timeout'] = properties['Timeout'].to_seconds.ceil
     end
-    
+
     if properties.include? 'Handle'
       if properties['Handle'].is_a? String
         properties['Handle'] = ref(properties['Handle'])
@@ -234,7 +253,7 @@ module Iam
 
     properties = {
         'Path' => path,
-        'Roles' => [ role.is_a?(String) ? ref(role) : role ]
+        'Roles' => [role.is_a?(String) ? ref(role) : role]
     }.reject { |k, v| v.nil? }
 
     if not options.empty?
@@ -246,6 +265,123 @@ module Iam
         'DependsOn' => depends_on,
         'Metadata' => metadata
     }.reject { |k, v| v.nil? || (v.is_a?(Hash) && v.empty?) }
+  end
+end
+
+module Route53
+  # Generate AWS::Route53::RecordSet resource properties.
+  #
+  # @example RecordSet using HostedZoneId
+  #     Route53.RecordSet :cname, 'mysite.example.com.',
+  #                        :hosted_zone_id => '/hostedzone/Z3DG6IL3SJCGPX',
+  #                        :comment => 'CNAME for my frontends.',
+  #                        :ttl => 15.minutes,
+  #                        :records => [ get_att('myLB', 'DNSName') ]
+  #
+  # @param type [String, Symbol] Type of records to add. Valid values: :a, :aaaa, :cname, :mx, :ns, :ptr, :soa, :spf, :srv, :txt
+  # @param domain [String] The name of the domain.
+  #     This must be a fully-specified domain, ending with a period as the last label indication.
+  #     If you omit the final period, Amazon Route 53 assumes the domain is relative to the root.
+  # @option options [String] :id A unique identifier that differentiates among multiple resource record sets that have the same combination of DNS name and type.
+  #     Required if you are creating a weighted resource record set.
+  # @option options [String] :comment Any comments you want to include about the hosted zone.
+  # @option options [String] :hosted_zone_id The ID of the hosted zone.
+  #     You must specify either the :hosted_zone_name or :hosted_zone_id, but you cannot specify both.
+  # @option options [String] :hosted_zone_name The name of the domain for the hosted zone where you want to add the record set.
+  #     You must specify either the :hosted_zone_name or :hosted_zone_id, but you cannot specify both.
+  #     If you have multiple hosted zones with the same domain name, you must explicitly specify the hosted zone using :hosted_zone_id.
+  # @option options [Array<String>] :records List of resource records to add.
+  #     Required if :ttl is specified.
+  # @option options [Fixnum, Timespan] :ttl The resource record cache time to live (TTL), in seconds.
+  #     If :ttl is specified, :records is also required.
+  # @option options [Fixnum] :weight Among resource record sets that have the same combination of DNS name and type, a value that determines what portion of traffic
+  #     for the current resource record set is routed to the associated location.
+  #     Required if you are creating a weighted resource record set.
+  # @option options [Hash] :alias_target Information about the domain to which you are redirecting traffic.
+  #     Required if you are creating an alias resource record set.
+  #     See {AliasTarget}
+  #
+  # @return [Hash] record set properties
+  #
+  # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-route53-recordset.html AWS::Route53::RecordSet
+  def self.RecordSet(type, domain, options={})
+    return {}.merge_not_empty(
+        'Type' => type.to_s.upcase,
+        'Name' => domain,
+        'SetIdentifier' => options.delete(:id),
+        'Comment' => options.delete(:comment),
+        'Region' => options.delete(:region),
+        'HostedZoneId' => options.delete(:hosted_zone_id),
+        'HostedZoneName' => options.delete(:hosted_zone_name),
+        'ResourceRecords' => options.delete(:records),
+        'TTL' => Timespan.parse_seconds_i(options.delete(:ttl)),
+        'Weight' => options.delete(:weight),
+        'AliasTarget' => options.delete(:alias_target)
+    )
+  end
+
+  # Generate a Route53 AliasTarget used in a AWS::Route53::RecordSet.
+  #
+  # @param hosted_zone_id [String] The hosted zone name ID of the Load Balancer that is the target of the alias.
+  # @param dns_name [String] The DNS name of the Load Balancer that is the target of the alias.
+  #
+  # @return [Hash] alias target resource
+  #
+  # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-route53-aliastarget.html Route 53 AliasTarget Property Type
+  def self.AliasTarget(hosted_zone_id, dns_name)
+    {
+        'HostedZoneId' => hosted_zone_id,
+        'DNSName' => dns_name
+    }
+  end
+  
+  # Add a AWS::Route53::RecordSet resource to the template.
+  #
+  # @example Adding RecordSet using HostedZoneId
+  #     route53_record_set 'myDNSRecord', :cname, 'mysite.example.com.',
+  #                        :hosted_zone_id => '/hostedzone/Z3DG6IL3SJCGPX',
+  #                        :comment => 'CNAME for my frontends.',
+  #                        :ttl => 15.minutes,
+  #                        :records => [ get_att('myLB', 'DNSName') ]
+  #
+  # @param name [String] Name of the resource.
+  # @param type [String, Symbol] Type of records to add. Valid values: :a, :aaaa, :cname, :mx, :ns, :ptr, :soa, :spf, :srv, :txt
+  # @param domain [String] The name of the domain.
+  #     This must be a fully-specified domain, ending with a period as the last label indication.
+  #     If you omit the final period, Amazon Route 53 assumes the domain is relative to the root.
+  # @option options [String] :id A unique identifier that differentiates among multiple resource record sets that have the same combination of DNS name and type.
+  #     Required if you are creating a weighted resource record set.
+  # @option options [String] :comment Any comments you want to include about the hosted zone.
+  # @option options [String] :hosted_zone_id The ID of the hosted zone.
+  #     You must specify either the :hosted_zone_name or :hosted_zone_id, but you cannot specify both.
+  # @option options [String] :hosted_zone_name The name of the domain for the hosted zone where you want to add the record set.
+  #     You must specify either the :hosted_zone_name or :hosted_zone_id, but you cannot specify both.
+  #     If you have multiple hosted zones with the same domain name, you must explicitly specify the hosted zone using :hosted_zone_id.
+  # @option options [Array<String>] :records List of resource records to add.
+  #     Required if :ttl is specified.
+  # @option options [Fixnum, Timespan] :ttl The resource record cache time to live (TTL), in seconds.
+  #     If :ttl is specified, :records is also required.
+  # @option options [Fixnum] :weight Among resource record sets that have the same combination of DNS name and type, a value that determines what portion of traffic
+  #     for the current resource record set is routed to the associated location.
+  #     Required if you are creating a weighted resource record set.
+  # @option options [Hash] :alias_target Information about the domain to which you are redirecting traffic.
+  #     Required if you are creating an alias resource record set.
+  #     See {AliasTarget}
+  # @option options [String] :depends Name of a resource that must be created before this resource.
+  # @option options [Hash] :metadata Metadata to associate with the resource
+  #
+  # @return [Hash] "Ref" => name
+  #
+  # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-route53-recordset.html AWS::Route53::RecordSet
+  def route53_record_set(name, type, domain, options={})
+    depends_on = options.delete :depends
+    metadata = options.delete :metadata
+
+    resource name, 'AWS::Route53::RecordSet', {}.merge_not_empty(
+        'Properties' => Route53.RecordSet(type, domain, options),
+        'DependsOn' => depends_on,
+        'Metadata' => metadata
+    )
   end
 end
 
@@ -448,6 +584,7 @@ class TemplateV1
   include Fn
   include CloudFormation
   include Iam
+  include Route53
 
   VERSION='2010-09-09'
 
