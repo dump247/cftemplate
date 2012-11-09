@@ -350,7 +350,7 @@ module Route53
   # @return [Hash] alias target resource
   #
   # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-route53-aliastarget.html Route 53 AliasTarget Property Type
-  def self.AliasTarget(hosted_zone_id, dns_name)
+  def self.alias_target(hosted_zone_id, dns_name)
     {
         'HostedZoneId' => hosted_zone_id,
         'DNSName' => dns_name
