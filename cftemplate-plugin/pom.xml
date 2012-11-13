@@ -32,11 +32,6 @@
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-project</artifactId>
         </dependency>
-        
-        <dependency>
-            <groupId>org.jruby</groupId>
-            <artifactId>jruby</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>com.google.guava</groupId>
