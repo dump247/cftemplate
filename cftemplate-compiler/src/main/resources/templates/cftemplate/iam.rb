@@ -11,6 +11,10 @@ module Iam
     attr_accessor :path
     array_attr_accessor :roles
 
+    def initialize()
+      @roles = []
+    end
+
     def roles=(value)
       @roles = value.collect { |v| v.is_a?(String) ? FN.ref(v) : v }
     end
