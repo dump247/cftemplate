@@ -169,6 +169,10 @@ public class RubyTemplateCompiler extends TemplateCompiler {
 
         // Called from crtemplate.rb
         private CompileIssueLocation parseCaller(String value) {
+            if (value == null) {
+                return null;
+            }
+
             String[] info = value.split(":");
             File file = new File(info[0]);
             int line = -1;

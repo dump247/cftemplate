@@ -73,7 +73,7 @@ public class TemplateCompilerTest {
 
     protected File resourceFile(String name) {
         File path = new File(resourcesDir(), name);
-        assertTrue(path.isFile());
+        assertTrue("Resource file not found: " + name, path.isFile());
         return path;
     }
 
