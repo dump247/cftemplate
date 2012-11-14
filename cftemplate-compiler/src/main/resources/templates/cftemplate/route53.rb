@@ -17,7 +17,10 @@ module Route53
       @alias_target = nil
     end
 
-    def alias_target(hosted_zone_id, dns_name)
+    def alias_target(options)
+      hosted_zone_id = options.delete_all(:hosted_zone_id, :zone)
+      dns_name = options.delete_all(:dns_name, :dns)
+
       @alias_target = {
           'HostedZoneId' => hosted_zone_id,
           'DNSName' => dns_name

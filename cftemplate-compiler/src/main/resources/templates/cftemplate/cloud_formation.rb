@@ -2,6 +2,21 @@ require 'ostruct'
 require 'cftemplate/timespan'
 require 'cftemplate/fn'
 
+class Hash
+  def delete_all(*keys)
+    value = nil
+
+    keys.each {|k|
+      kv = delete(k)
+      if not kv.nil?
+        value = kv
+      end
+    }
+
+    return value
+  end
+end
+
 class Class
   private
 
