@@ -90,6 +90,7 @@ end
 
 class TemplateV1
   include FN
+  include Ref
   include CloudFormation
   include Iam
   include Route53
