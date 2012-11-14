@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Queues.newArrayDeque;
@@ -33,16 +34,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  * Compiles and verifies AWS CloudFormation templates.
  */
 public abstract class TemplateCompiler {
-    /**
-     * Compile a template file to CloudFormation JSON.
-     *
-     * @param inputFile template file to compile
-     * @param outputFile file to write the CloudFormation JSON to
-     * @param options compiler options
-     * @return result of compilation
-     */
-    public abstract CompileResult compile(File inputFile, File outputFile, CompileOptions options)
-            throws IOException;
+    private Map<String, String> _parameters = newHashMap();
 
     /**
      * Compile a template file to CloudFormation JSON.
@@ -51,9 +43,28 @@ public abstract class TemplateCompiler {
      * @param outputFile file to write the CloudFormation JSON to
      * @return result of compilation
      */
-    public CompileResult compile(File inputFile, File outputFile)
-            throws IOException {
-        return compile(inputFile, outputFile, new CompileOptions());
+    public abstract CompileResult compile(File inputFile, File outputFile)
+            throws IOException;
+
+    /**
+     * Get parameter overrides.
+     *
+     * @return map from parameter name to value override
+     */
+    public Map<String, String> getParameters() {
+        return _parameters;
+    }
+
+    /**
+     * Set parameter overrides.
+     * <p/>
+     * If the parameter exists in the template, the default value is set to the
+     * given value. Overrides with null values are ignored.
+     *
+     * @param parameters parameter overrides
+     */
+    public void setParameters(Map<String, String> parameters) {
+        _parameters = checkNotNull(parameters);
     }
 
     private static class TemplateValue {

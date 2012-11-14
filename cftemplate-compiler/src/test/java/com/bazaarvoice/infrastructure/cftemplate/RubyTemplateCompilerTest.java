@@ -1,12 +1,12 @@
 package com.bazaarvoice.infrastructure.cftemplate;
 
 import com.google.common.base.Throwables;
-import org.apache.commons.io.Charsets;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.Map;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -22,6 +22,10 @@ public class RubyTemplateCompilerTest extends TemplateCompilerTest {
     }
 
     private CompileResult assertCompile(String name, int errors) {
+        return assertCompile(new RubyTemplateCompiler(), name, errors);
+    }
+
+    private CompileResult assertCompile(RubyTemplateCompiler compiler, String name, int errors) {
         try {
             String templateName = name + ".rb";
             String outputName = name + ".json";
@@ -29,7 +33,6 @@ public class RubyTemplateCompilerTest extends TemplateCompilerTest {
             File templateFile = resourceFile(templateName);
             File outputFile = new File(tempDir(".output"), outputName);
 
-            RubyTemplateCompiler compiler = new RubyTemplateCompiler();
             CompileResult result = compiler.compile(templateFile, outputFile);
 
             if (errors == 0) {
@@ -195,5 +198,18 @@ public class RubyTemplateCompilerTest extends TemplateCompilerTest {
     @Test
     public void testCompile_iam_instance_profile_utility() {
         assertCompile("resourceIamProfile");
+    }
+
+    @Test
+    public void testCompile_parameter_overrides() {
+        Map<String, String> parameters = newHashMap();
+        parameters.put("NotFound", "AAAA");
+        parameters.put("NullValue", null);
+        parameters.put("Param1", "");
+        parameters.put("Param2", "BBBB");
+
+        RubyTemplateCompiler compiler = new RubyTemplateCompiler();
+        compiler.setParameters(parameters);
+        assertCompile(compiler, "parameterOverrides", 0);
     }
 }

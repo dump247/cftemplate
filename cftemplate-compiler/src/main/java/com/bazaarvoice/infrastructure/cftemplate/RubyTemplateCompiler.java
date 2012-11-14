@@ -24,14 +24,11 @@ import static com.google.common.collect.Maps.newLinkedHashMap;
  * Compiles Ruby DSL templates to CloudFormation JSON.
  */
 public class RubyTemplateCompiler extends TemplateCompiler {
-
-
     @Override
-    public CompileResult compile(File inputFile, File outputFile, CompileOptions options)
+    public CompileResult compile(File inputFile, File outputFile)
             throws IOException {
         checkNotNull(inputFile);
         checkNotNull(outputFile);
-        checkNotNull(options);
 
         if (outputFile.exists()) {
             outputFile.delete();
@@ -46,7 +43,7 @@ public class RubyTemplateCompiler extends TemplateCompiler {
         try {
             ScriptingContainer engine = new ScriptingContainer();
             engine.getLoadPaths().add("templates");
-            engine.put("$cftemplate_parameters", options.getParameters());
+            engine.put("$cftemplate_parameters", getParameters());
             engine.put("$cftemplate_output", output);
             engine.setCurrentDirectory(inputFile.getParent());
             engine.setCompatVersion(CompatVersion.RUBY1_9);

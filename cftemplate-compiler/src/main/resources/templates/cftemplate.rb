@@ -98,12 +98,12 @@ class TemplateV1
   VERSION='2010-09-09'
 
   attr_reader :description, :resources
+  attr_accessor :overrides
 
-  def initialize(description='', &block)
+  def initialize(description='')
     @description = description
     @resources = {}
-
-    instance_eval(&block)
+    @overrides = {}
   end
 
   def parameter(name, type, description='', args={})
@@ -203,6 +203,10 @@ class TemplateV1
 
       paramData['NoEcho'] = !paramData['echo']
       paramData.delete 'echo'
+    end
+
+    if overrides.include?(name) && !overrides[name].nil?
+      paramData['Default'] = overrides[name]
     end
 
     $cftemplate_output.addParameter(location, name, clean_obj(paramData))
@@ -367,7 +371,9 @@ def template(version, description='', &block)
 
   case version
     when TemplateV1::VERSION
-      tmpl = TemplateV1.new(description, &block)
+      tmpl = TemplateV1.new(description)
+      tmpl.overrides.merge!($cftemplate_parameters)
+      tmpl.instance_eval &block
     else
       return
   end

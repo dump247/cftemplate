@@ -1,0 +1,26 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Parameters" : {
+        "NullValue" : {
+            "Type" : "String"
+        },
+        "Param1" : {
+            "Type" : "String",
+            "Default" : ""
+        },
+        "Param2" : {
+            "Type" : "String",
+            "Default" : "BBBB"
+        },
+        "Param3" : {
+            "Type" : "String",
+            "Default" : "DEF"
+        }
+    },
+    "Resources" : {
+        "Dummy" : {
+            "Type" : "AWS::CloudFormation::WaitConditionHandle",
+            "Properties" : { }
+        }
+    }
+}

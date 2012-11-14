@@ -19,7 +19,7 @@ import static com.google.common.collect.Lists.newArrayList;
  */
 public class JsonTemplateCompiler extends TemplateCompiler {
     @Override
-    public CompileResult compile(File inputFile, File outputFile, CompileOptions options)
+    public CompileResult compile(File inputFile, File outputFile)
             throws IOException {
         List<CompileIssue> issues = newArrayList();
         CompileResult result = null;
@@ -28,6 +28,9 @@ public class JsonTemplateCompiler extends TemplateCompiler {
         try {
             Map<String, Object> inputData = new ObjectMapper().readValue(inputFile, new TypeReference<Map<String, Object>>() {
             });
+
+            checkOverrides(inputData);
+
             resultNode = compile(inputData, issues);
         } catch (Exception ex) {
             issues.add(new CompileIssue(CompileIssueLevel.ERROR, ex.getMessage(), new CompileIssueLocation(inputFile)));
@@ -40,5 +43,23 @@ public class JsonTemplateCompiler extends TemplateCompiler {
         }
 
         return result;
+    }
+
+    private void checkOverrides(Map<String, Object> template) {
+        Object parameters = template.get("Parameters");
+
+        if (parameters instanceof Map) {
+            Map parametersMap = (Map) parameters;
+
+            for (Map.Entry<String, String> override : getParameters().entrySet()) {
+                if (override.getValue() != null) {
+                    Object parameter = parametersMap.get(override.getKey());
+
+                    if (parameter instanceof Map) {
+                        ((Map) parameter).put("Default", override.getValue());
+                    }
+                }
+            }
+        }
     }
 }
