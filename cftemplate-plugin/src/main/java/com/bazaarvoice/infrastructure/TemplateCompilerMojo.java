@@ -17,9 +17,11 @@ import org.jruby.embed.ScriptingContainer;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
+import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 
 /**
@@ -70,6 +72,13 @@ public class TemplateCompilerMojo
      */
     private Set<String> excludes = newHashSet();
 
+    /**
+     * Template parameter default value overrides.
+     *
+     * @parameter
+     */
+    private Map<String, String> parameters = newHashMap();
+
     private RubyTemplateCompiler _rubyTemplateCompiler = new RubyTemplateCompiler();
     private JsonTemplateCompiler _jsonTemplateCompiler = new JsonTemplateCompiler();
 
@@ -79,6 +88,9 @@ public class TemplateCompilerMojo
             getLog().info(String.format("No templates found in %s", inputDirectory));
             return;
         }
+
+        _rubyTemplateCompiler.setParameters(parameters);
+        _jsonTemplateCompiler.setParameters(parameters);
 
         File outDir = getOutputDirectory();
         File[] sourceFiles = inputDirectory.listFiles(new GlobFilenameFilter(includes, excludes));

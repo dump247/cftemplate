@@ -1,6 +1,8 @@
 package com.bazaarvoice.infrastructure.cftemplate;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.node.ObjectNode;
@@ -24,6 +26,13 @@ import static com.google.common.collect.Maps.newLinkedHashMap;
  * Compiles Ruby DSL templates to CloudFormation JSON.
  */
 public class RubyTemplateCompiler extends TemplateCompiler {
+    private static final Predicate<Map.Entry<String, String>> NULL_VALUE = new Predicate<Map.Entry<String, String>>() {
+        @Override
+        public boolean apply(Map.Entry<String, String> input) {
+            return input.getValue() != null;
+        }
+    };
+
     @Override
     public CompileResult compile(File inputFile, File outputFile)
             throws IOException {
@@ -43,7 +52,7 @@ public class RubyTemplateCompiler extends TemplateCompiler {
         try {
             ScriptingContainer engine = new ScriptingContainer();
             engine.getLoadPaths().add("templates");
-            engine.put("$cftemplate_parameters", getParameters());
+            engine.put("$cftemplate_parameters", Maps.filterEntries(getParameters(), NULL_VALUE));
             engine.put("$cftemplate_output", output);
             engine.setCurrentDirectory(inputFile.getParent());
             engine.setCompatVersion(CompatVersion.RUBY1_9);
