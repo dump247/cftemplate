@@ -10,7 +10,11 @@ module Route53
     cf_type 'AWS::Route53::RecordSet'
     attr_accessor :name, :type, :hosted_zone_name, :hosted_zone_id, :set_identifier, :comment, :region, :ttl, :weight
     array_attr_accessor :resource_records
-    attr_accessor_alias :id => :set_identifier, :description => :comment, :records => :resource_records
+    attr_accessor_alias :id => :set_identifier,
+                        :description => :comment,
+                        :records => :resource_records,
+                        :zone_name => :hosted_zone_name,
+                        :zone_id => :hosted_zone_id
 
     def initialize()
       @records = []
