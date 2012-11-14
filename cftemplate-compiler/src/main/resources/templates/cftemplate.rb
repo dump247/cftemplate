@@ -324,10 +324,6 @@ class TemplateV1
     FN.ref(name)
   end
 
-  def create_resource(location, name, options, &block)
-    # TODO
-  end
-
   def tag_options(options)
     result = {}
 
