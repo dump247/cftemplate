@@ -228,7 +228,8 @@ module CloudFormation
   # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-stack.html AWS::CloudFormation::Stack
   class Stack < Resource
     cf_type 'AWS::CloudFormation::Stack'
-    attr_accessor :url, :timeout, :parameters
+    attr_accessor :template_url, :timeout_in_minutes, :parameters
+    attr_accessor_alias :timeout => :timeout_in_minutes, :url => :template_url
 
     def timeout=(value)
       @timeout = value.is_a?(Timespan) ? value.to_minutes.ceil : value
