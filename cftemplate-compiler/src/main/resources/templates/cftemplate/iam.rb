@@ -20,7 +20,7 @@ module Iam
     end
 
     def role(value)
-      roles.push(value)
+      roles.push(value.is_a?(String) ? FN.ref(value) : value)
     end
 
     private
