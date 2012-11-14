@@ -9,18 +9,13 @@ module Route53
   class RecordSet < CloudFormation::Resource
     cf_type 'AWS::Route53::RecordSet'
     attr_accessor :name, :type, :hosted_zone_name, :hosted_zone_id, :set_identifier, :comment, :region, :ttl, :weight
-    array_attr_accessor :records
+    array_attr_accessor :resource_records
+    attr_accessor_alias :id => :set_identifier, :description => :comment, :records => :resource_records
 
     def initialize()
       @records = []
       @alias_target = nil
     end
-
-    alias :id :set_identifier
-    alias :id= :set_identifier=
-
-    alias :description :comment
-    alias :description= :comment=
 
     def alias_target(hosted_zone_id, dns_name)
       @alias_target = {
@@ -29,9 +24,11 @@ module Route53
       }
     end
 
-    def record(value)
-      records.push(value)
+    def resource_record(value)
+      resource_records.push(value)
     end
+
+    alias :record :resource_record
 
     def type=(value)
       @type = value.is_a?(String) || value.is_a?(Symbol) ? value.to_s.upcase : value

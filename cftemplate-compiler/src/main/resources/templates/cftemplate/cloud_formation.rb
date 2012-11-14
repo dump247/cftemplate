@@ -11,6 +11,13 @@ class Class
     end
   end
 
+  def attr_accessor_alias(aliases)
+    aliases.each { |new, old|
+      alias_method new, old
+      alias_method "#{new}=".to_sym, "#{old}=".to_sym
+    }
+  end
+
   def array_attr_accessor(*names)
     names.each { |name|
       define_method name do |*args|
