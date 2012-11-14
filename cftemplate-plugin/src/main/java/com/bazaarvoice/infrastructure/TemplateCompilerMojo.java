@@ -11,15 +11,15 @@ import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
-import org.jruby.embed.PathType;
-import org.jruby.embed.ScriptingContainer;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
@@ -93,12 +93,12 @@ public class TemplateCompilerMojo
         _jsonTemplateCompiler.setParameters(parameters);
 
         File outDir = getOutputDirectory();
-        File[] sourceFiles = inputDirectory.listFiles(new GlobFilenameFilter(includes, excludes));
-        List<Compilation> compiles = newArrayListWithCapacity(sourceFiles.length);
+        List<File> sourceFiles = walk(inputDirectory, new GlobFilenameFilter(includes, excludes));
+        List<Compilation> compiles = newArrayListWithCapacity(sourceFiles.size());
 
         for (File file : sourceFiles) {
             String extension = FilenameUtils.getExtension(file.getName());
-            File outputFile = new File(outDir, changeExtension(file.getName(), ".json"));
+            File outputFile = changeExtension(changeBaseDir(inputDirectory, outDir, file), ".json");
             TemplateCompiler compiler = null;
 
             if (extension.equals("rb")) {
@@ -141,6 +141,27 @@ public class TemplateCompilerMojo
         }
     }
 
+    private static File changeBaseDir(File oldBaseDir, File newBaseDir, File path) {
+        String subPath = path.getAbsolutePath().substring(oldBaseDir.getAbsolutePath().length() + 1);
+        return new File(newBaseDir, subPath);
+    }
+
+    private static void walk(File directory, FilenameFilter filter, List<File> files) {
+        for (File file : directory.listFiles()) {
+            if (file.isDirectory()) {
+                walk(file, filter, files);
+            } else if (filter.accept(directory, file.getName())) {
+                files.add(file);
+            }
+        }
+    }
+
+    private static List<File> walk(File directory, FilenameFilter filter) {
+        List<File> files = newArrayList();
+        walk(directory, filter, files);
+        return files;
+    }
+
     private int outputResults(CompileResult result) {
         int failureCount = 0;
 
@@ -169,16 +190,19 @@ public class TemplateCompilerMojo
         return failureCount;
     }
 
-    private static String changeExtension(String name, String extension) {
+    private static File changeExtension(File path, String extension) {
+        String name = path.getName();
         int dotIndex = name.lastIndexOf('.');
 
         if (dotIndex < 0) {
-            return name + extension;
+            name = name + extension;
         } else if (dotIndex == 0) {
-            return extension;
+            name = extension;
         } else {
-            return name.substring(0, dotIndex) + extension;
+            name = name.substring(0, dotIndex) + extension;
         }
+
+        return new File(path.getParent(), name);
     }
 
     private File getOutputDirectory() {
