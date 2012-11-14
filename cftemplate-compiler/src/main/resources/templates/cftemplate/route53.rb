@@ -8,7 +8,7 @@ module Route53
   # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-route53-recordset.html AWS::Route53::RecordSet
   class RecordSet < CloudFormation::Resource
     cf_type 'AWS::Route53::RecordSet'
-    attr_accessor :name, :type, :hosted_zone_name, :hosted_zone_id, :set_identifier, :comment, :region, :ttl, :weight
+    attr_accessor :name, :type, :hosted_zone_name, :hosted_zone_id, :set_identifier, :comment, :region, :ttl, :weight, :alias_target
     array_attr_accessor :resource_records
     attr_accessor_alias :id => :set_identifier,
                         :description => :comment,
@@ -18,11 +18,10 @@ module Route53
 
     def initialize()
       @records = []
-      @alias_target = nil
     end
 
-    def alias_target(options)
-      hosted_zone_id = options.delete_all(:hosted_zone_id, :zone)
+    def alias_target=(options)
+      hosted_zone_id = options.delete_all(:hosted_zone_id, :zone_id, :zone)
       dns_name = options.delete_all(:dns_name, :dns)
 
       @alias_target = {
