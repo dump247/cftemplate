@@ -231,8 +231,8 @@ module CloudFormation
     attr_accessor :template_url, :timeout_in_minutes, :parameters
     attr_accessor_alias :timeout => :timeout_in_minutes, :url => :template_url
 
-    def timeout=(value)
-      @timeout = value.is_a?(Timespan) ? value.to_minutes.ceil : value
+    def timeout_in_minutes=(value)
+      @timeout_in_minutes = value.is_a?(Timespan) ? value.to_minutes.ceil : value
     end
 
     private
