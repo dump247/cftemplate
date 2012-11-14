@@ -2,7 +2,8 @@
     "AWSTemplateFormatVersion" : "2010-09-09",
     "Parameters" : {
         "NullValue" : {
-            "Type" : "String"
+            "Type" : "String",
+            "Default" : "XYZ"
         },
         "Param1" : {
             "Type" : "String",
