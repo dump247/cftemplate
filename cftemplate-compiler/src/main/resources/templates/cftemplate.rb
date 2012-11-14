@@ -292,11 +292,11 @@ class TemplateV1
     return content
   end
 
-  def tags(tags={})
-    options = tag_options(tags)
+  def tags(tags={}, options={})
+    options = tag_options(options)
 
     tags.collect { |k, v|
-      if v.is_a? Hash
+      if v.is_a?(Hash) && v.include?('Value')
         options.merge(v).merge('Key' => k)
       else
         options.merge('Key' => k, 'Value' => v)
