@@ -1,49 +1,25 @@
-require 'cftemplate'
-
 # Max 32 parameters
 
 template '2010-09-09' do
-  parameter 'P1', 'CommaDelimitedList',
-            'Default' => ''
+  parameter 'P8', :List do
+    default ''
+  end
 
-  parameter 'P2', 'CommaDelimitedList',
-            'Default' => 'a'
+  parameter 'P9', :List do
+    default 'a'
+  end
 
-  parameter 'P3', 'CommaDelimitedList',
-            'Default' => 'a,b'
+  parameter 'P12', :List do
+    default []
+  end
 
-  parameter 'P4', 'CommaDelimitedList',
-            'Default' => '    a,    b   '
+  parameter 'P13', :List do
+    default ['a']
+  end
 
-  parameter 'P5', 'CommaDelimitedList',
-            'Default' => []
-
-  parameter 'P6', 'CommaDelimitedList',
-            'Default' => ['a']
-
-  parameter 'P7', 'CommaDelimitedList',
-            'Default' => ['a', 'b']
-
-  parameter 'P8', 'CommaDelimitedList',
-            :default => ''
-
-  parameter 'P9', 'CommaDelimitedList',
-            :default => 'a'
-
-  parameter 'P10', 'CommaDelimitedList',
-            :default => 'a,b'
-
-  parameter 'P11', 'CommaDelimitedList',
-            :default => '    a,    b   '
-
-  parameter 'P12', 'CommaDelimitedList',
-            :default => []
-
-  parameter 'P13', 'CommaDelimitedList',
-            :default => ['a']
-
-  parameter 'P14', 'CommaDelimitedList',
-            :default => ['a', 'b']
+  parameter 'P14', :List do
+    default ['a', 'b']
+  end
 
 
   # At least one resource is required

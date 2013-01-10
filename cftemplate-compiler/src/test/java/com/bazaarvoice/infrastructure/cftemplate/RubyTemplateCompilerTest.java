@@ -106,11 +106,6 @@ public class RubyTemplateCompilerTest extends TemplateCompilerTest {
     }
 
     @Test
-    public void testCompile_with_invalid_parameter_length_configuration() {
-        assertCompile("invalidParameterLength", 10);
-    }
-
-    @Test
     public void testCompile_number_parameter_with_value_range_constraint() {
         assertCompile("parameterValueConstraint");
     }
@@ -211,5 +206,10 @@ public class RubyTemplateCompilerTest extends TemplateCompilerTest {
         RubyTemplateCompiler compiler = new RubyTemplateCompiler();
         compiler.setParameters(parameters);
         assertCompile(compiler, "parameterOverrides", 0);
+    }
+
+    @Test
+    public void testCompile_select_builtin_function() {
+        assertCompile("fnSelect");
     }
 }

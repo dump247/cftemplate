@@ -36,7 +36,7 @@ public class JsonTemplateCompiler extends TemplateCompiler {
             issues.add(new CompileIssue(CompileIssueLevel.ERROR, ex.getMessage(), new CompileIssueLocation(inputFile)));
         }
 
-        result = new CompileResult(issues);
+        result = new CompileResult(inputFile, issues);
 
         if (resultNode != null && result.getIssues(CompileIssueLevel.ERROR).size() == 0) {
             new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, true).writeValue(outputFile, resultNode);

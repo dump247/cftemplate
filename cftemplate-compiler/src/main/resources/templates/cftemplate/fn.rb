@@ -1,3 +1,15 @@
+module Kernel
+  # The kernel select method overrides the FN::select method.
+  # Kernel select is unlikely to be needed.
+  remove_method :select
+end
+
+class << Kernel
+  # The kernel select method overrides the FN::select method.
+  # Kernel select is unlikely to be needed.
+  remove_method :select
+end
+
 # CloudFormation intrinsic template functions.
 # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference.html Intrinsic Function Reference
 module FN
@@ -7,7 +19,11 @@ module FN
   # @param list list of objects to select from
   # @return [Hash] { 'Fn::Select' => [index, list] }
   def select(index, list)
-    {'Fn::Select' => [index, list]}
+    if list.is_a? Array
+      {'Fn::Select' => [index, list.flatten(1)]}
+    else
+      {'Fn::Select' => [index, list]}
+    end
   end
 
   module_function :select
@@ -72,15 +88,7 @@ module FN
   # @param [Array] content content values to join
   # @return [Hash] { "Fn::Join" => [separator, content] }
   def join(separator, *content)
-    values = content
-
-    if values.nil? || values.length == 0
-      values = []
-    elsif values.length == 1 && values[0].is_a?(Array)
-      values = values[0]
-    end
-
-    {'Fn::Join' => [separator, values]};
+    {'Fn::Join' => [separator, content.flatten(1)]};
   end
 
   module_function :join

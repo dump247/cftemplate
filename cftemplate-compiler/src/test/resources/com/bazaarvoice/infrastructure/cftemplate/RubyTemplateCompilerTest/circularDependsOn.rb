@@ -1,5 +1,3 @@
-require 'cftemplate'
-
 template '2010-09-09' do
   resource 'Resource1' do
     type 'AWS::CloudFormation::WaitConditionHandle'

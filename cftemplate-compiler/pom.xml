@@ -4,18 +4,23 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>aws-deploy</artifactId>
-        <groupId>com.bazaarvoice.infrastructure</groupId>
+        <groupId>cftemplate</groupId>
+        <artifactId>parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>com.bazaarvoice.infrastructure</groupId>
+    <groupId>cftemplate</groupId>
     <artifactId>cftemplate-compiler</artifactId>
 
-    <name>CloudFormation Template Compiler</name>
+    <name>Template Compiler Library</name>
 
     <dependencies>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.jruby</groupId>
             <artifactId>jruby-complete</artifactId>
@@ -29,11 +34,6 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
         </dependency>
 
         <dependency>

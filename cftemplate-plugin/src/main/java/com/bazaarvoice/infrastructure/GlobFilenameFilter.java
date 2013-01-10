@@ -76,6 +76,6 @@ public class GlobFilenameFilter implements FilenameFilter {
         }
 
         buffer.append('$');
-        return Pattern.compile(buffer.toString());
+        return Pattern.compile(buffer.toString(), Pattern.CASE_INSENSITIVE);
     }
 }

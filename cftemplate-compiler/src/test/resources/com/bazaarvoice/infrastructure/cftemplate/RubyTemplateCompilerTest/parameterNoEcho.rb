@@ -1,25 +1,13 @@
-require 'cftemplate'
-
 # Max 32 parameters
 
 template '2010-09-09' do
-  parameter 'P1', 'String',
-            'NoEcho' => true
+  parameter 'P5', 'String' do
+    echo true
+  end
 
-  parameter 'P2', 'String',
-            'NoEcho' => "TRUE"
-
-  parameter 'P3', 'String',
-            'NoEcho' => false
-
-  parameter 'P4', 'String',
-            'NoEcho' => "FALSE"
-
-  parameter 'P5', 'String',
-            :echo => true
-
-  parameter 'P6', 'String',
-            :echo => false
+  parameter 'P6', 'String' do
+    echo false
+  end
 
 
   # At least one resource is required

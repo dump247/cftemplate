@@ -1,5 +1,3 @@
-require 'cftemplate'
-
 template '2010-09-09' do
   resource 'Dummy', 'AWS::CloudFormation::Stack' do
     properties 'TemplateURL' => 'http://localhost/no.template'

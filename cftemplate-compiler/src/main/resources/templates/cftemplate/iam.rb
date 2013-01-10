@@ -6,7 +6,7 @@ module Iam
   # CloudFormation resource that represents an IAM instance profile.
   #
   # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-instanceprofile.html AWS::IAM::InstanceProfile
-  class InstanceProfile < CloudFormation::Resource
+  class InstanceProfile < CloudFormation::StackResource
     cf_type 'AWS::IAM::InstanceProfile'
     attr_accessor :path
     array_attr_accessor :roles

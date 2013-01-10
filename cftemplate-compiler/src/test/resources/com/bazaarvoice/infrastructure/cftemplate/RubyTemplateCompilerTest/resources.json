@@ -27,6 +27,15 @@
             },
             "DependsOn" : "Resource1",
             "DeletionPolicy" : "Retain"
+        },
+        "ResourceSingle" : {
+            "Type" : "AWS::IAM::InstanceProfile",
+            "Properties" : {
+                "Path" : "/",
+                "Other" : "7",
+                "Some" : "8.0",
+                "X" : "true"
+            }
         }
     }
 }

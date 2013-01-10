@@ -6,7 +6,7 @@ module Route53
   # Route53 DNS record set.
   #
   # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-route53-recordset.html AWS::Route53::RecordSet
-  class RecordSet < CloudFormation::Resource
+  class RecordSet < CloudFormation::StackResource
     cf_type 'AWS::Route53::RecordSet'
     attr_accessor :name, :type, :hosted_zone_name, :hosted_zone_id, :set_identifier, :comment, :region, :ttl, :weight, :alias_target
     array_attr_accessor :resource_records

@@ -21,6 +21,12 @@
         },
         "ArrayOutput" : {
             "Value" : [ "a", "b" ]
+        },
+        "A" : {
+            "Value" : "B"
+        },
+        "C" : {
+            "Value" : "D"
         }
     }
 }

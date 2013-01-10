@@ -1,5 +1,3 @@
-require 'cftemplate'
-
 template do
 
 

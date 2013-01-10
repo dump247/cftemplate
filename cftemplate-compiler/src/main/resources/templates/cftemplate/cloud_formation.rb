@@ -6,7 +6,7 @@ class Hash
   def delete_all(*keys)
     value = nil
 
-    keys.each {|k|
+    keys.each { |k|
       kv = delete(k)
       if not kv.nil?
         value = kv
@@ -30,6 +30,23 @@ class Class
     aliases.each { |new, old|
       alias_method new, old
       alias_method "#{new}=".to_sym, "#{old}=".to_sym
+    }
+  end
+
+  def hash_attr_accessor(*names)
+    names.each { |name|
+      define_method name do |*args|
+        if !args.nil? && args.length > 0
+          existing_value = instance_variable_get("@#{name}") || {}
+          public_send "#{name}=", existing_value.merge(args[0])
+        end
+
+        instance_variable_get("@#{name}")
+      end
+
+      define_method "#{name}=" do |value|
+        instance_variable_set("@#{name}", value)
+      end
     }
   end
 
@@ -74,11 +91,159 @@ module CloudFormation
     def cf_build
       OpenStruct.new(:resource => {}, :issues => [])
     end
+
+    def evaluate(&block)
+      if block.nil?
+        return
+      end
+
+      begin
+        @evaluate_context = eval 'self', block.binding
+        instance_eval &block
+      ensure
+        @evaluate_context = nil
+      end
+    end
+
+    def method_missing(method, *args, &block)
+      if @evaluate_context.nil?
+        super
+      else
+        @evaluate_context.send method, *args, &block
+      end
+    end
+  end
+
+  class StackParameter < CFObject
+    attr_accessor :description, :constraint, :echo
+
+    def initialize(name)
+      @name = name
+    end
+
+    def type_name
+      raise 'Not implemented'
+    end
+
+    def cf_build
+      result = super()
+
+      result.resource = {
+          'Type' => type_name,
+          'Description' => description,
+          'Default' => default,
+          'ConstraintDescription' => constraint,
+          'NoEcho' => echo == false || nil
+      }.delete_if { |k, v| v.nil? }
+
+      result
+    end
+  end
+
+  class StringParameter < StackParameter
+    attr_accessor :length, :pattern, :default
+    array_attr_accessor :values
+
+    def initialize(name)
+      super(name)
+    end
+
+    def type_name
+      'String'
+    end
+
+    def cf_build
+      result = super()
+
+      if length.is_a? Numeric
+        result.resource['MinLength'] = length
+        result.resource['MaxLength'] = length
+      elsif length.is_a? Range
+        result.resource['MinLength'] = length.min
+        result.resource['MaxLength'] = length.max
+      elsif !length.nil?
+        raise 'Unknown length type ' + length
+      end
+
+      if !pattern.nil?
+        result.resource['AllowedPattern'] = pattern
+      end
+
+      if !values.nil?
+        result.resource['AllowedValues'] = values
+      end
+
+      result
+    end
+  end
+
+  class NumberParameter < StackParameter
+    array_attr_accessor :values
+    attr_accessor :min, :max, :default
+
+    def initialize(name)
+      super(name)
+    end
+
+    def range(value)
+      if value.nil?
+        self.min = nil
+        self.max = nil
+      else
+        self.min = value.min
+        self.max = value.max
+      end
+    end
+
+    def type_name
+      'Number'
+    end
+
+    def cf_build
+      result = super()
+
+      result.resource.merge!(
+          {
+              'MinValue' => min,
+              'MaxValue' => max,
+              'AllowedValues' => values
+          }.delete_if { |k, v| v.nil? })
+
+      result
+    end
+  end
+
+  class CommaDelimitedListParameter < StackParameter
+    array_attr_accessor :default
+
+    def initialize(name)
+      super(name)
+    end
+
+    def type_name
+      'CommaDelimitedList'
+    end
+  end
+
+  class StackOutput < CFObject
+    attr_accessor :value, :description
+
+    def cf_build
+      result = super()
+
+      result.resource = {
+          'Description' => description,
+          'Value' => value
+      }.delete_if { |k, v| v.nil? }
+
+      result
+    end
   end
 
   # @abstract CloudFormation template resource.
-  class Resource < CFObject
-    attr_accessor :depends_on, :metadata, :deletion_policy
+  class StackResource < CFObject
+    hash_attr_accessor :metadata
+    attr_accessor :depends_on, :deletion_policy
 
     def initialize()
       @evaluate_context = nil
@@ -115,27 +280,6 @@ module CloudFormation
       return result
     end
 
-    def evaluate(&block)
-      if block.nil?
-        return
-      end
-
-      begin
-        @evaluate_context = eval 'self', block.binding
-        instance_eval &block
-      ensure
-        @evaluate_context = nil
-      end
-    end
-
-    def method_missing(method, *args, &block)
-      if @evaluate_context.nil?
-        super
-      else
-        @evaluate_context.send method, *args, &block
-      end
-    end
-
     private
 
     def build_resource_properties(issues)
@@ -162,7 +306,7 @@ module CloudFormation
   # Resource used for signaling an associated {WaitCondition}.
   #
   # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-waitconditionhandle.html AWS::CloudFormation::WaitConditionHandle
-  class WaitConditionHandle < Resource
+  class WaitConditionHandle < StackResource
     cf_type 'AWS::CloudFormation::WaitConditionHandle'
   end
 
@@ -182,12 +326,12 @@ module CloudFormation
   # Resource used for pausing the stack creation until a condition is met.
   #
   # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-waitcondition.html AWS::CloudFormation::WaitCondition
-  class WaitCondition < Resource
+  class WaitCondition < StackResource
     cf_type 'AWS::CloudFormation::WaitCondition'
     attr_accessor :timeout, :count, :handle
 
     def timeout=(value)
-      @timeout = value.is_a?(Timespan) ? value.to_seconds.ceil : value
+      @timeout = value.is_a?(Timespan) ? value.in_seconds : value
     end
 
     def handle=(value)
@@ -241,13 +385,14 @@ module CloudFormation
   # Embeds a stack as a resource in a template.
   #
   # @see http://docs.amazonwebservices.com/AWSCloudFormation/latest/UserGuide/aws-properties-stack.html AWS::CloudFormation::Stack
-  class Stack < Resource
+  class Stack < StackResource
     cf_type 'AWS::CloudFormation::Stack'
-    attr_accessor :template_url, :timeout_in_minutes, :parameters
+    attr_accessor :timeout_in_minutes, :parameters, :template_url
+    hash_attr_accessor :parameters
     attr_accessor_alias :timeout => :timeout_in_minutes, :url => :template_url
 
     def timeout_in_minutes=(value)
-      @timeout_in_minutes = value.is_a?(Timespan) ? value.to_minutes.ceil : value
+      @timeout_in_minutes = value.is_a?(Timespan) ? value.in_minutes : value
     end
 
     private
@@ -284,8 +429,10 @@ module CloudFormation
   end
 
   # Define a resource without type specific helpers and validations.
-  class GenericResource < Resource
-    attr_accessor :properties, :type
+  class GenericResource < StackResource
+    attr_accessor :type
+    hash_attr_accessor :properties
+    attr_accessor_alias :property => :properties
 
     def cf_type
       self.type

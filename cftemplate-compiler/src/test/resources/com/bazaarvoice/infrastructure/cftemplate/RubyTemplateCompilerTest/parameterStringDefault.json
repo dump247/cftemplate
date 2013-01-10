@@ -1,22 +1,6 @@
 {
     "AWSTemplateFormatVersion" : "2010-09-09",
     "Parameters" : {
-        "P1" : {
-            "Type" : "String",
-            "Default" : "true"
-        },
-        "P2" : {
-            "Type" : "String",
-            "Default" : "18"
-        },
-        "P3" : {
-            "Type" : "String",
-            "Default" : ""
-        },
-        "P4" : {
-            "Type" : "String",
-            "Default" : "str"
-        },
         "P5" : {
             "Type" : "String",
             "Default" : "true"

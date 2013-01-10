@@ -5,15 +5,7 @@
             "Type" : "Number",
             "MinValue" : "10"
         },
-        "P2" : {
-            "Type" : "Number",
-            "MinValue" : "10"
-        },
         "P3" : {
-            "Type" : "Number",
-            "MaxValue" : "-10"
-        },
-        "P4" : {
             "Type" : "Number",
             "MaxValue" : "-10"
         },
@@ -41,15 +33,7 @@
             "Type" : "Number",
             "MinValue" : "1.0"
         },
-        "P10" : {
-            "Type" : "Number",
-            "MinValue" : "1.0"
-        },
         "P11" : {
-            "Type" : "Number",
-            "MaxValue" : "-10.0"
-        },
-        "P12" : {
             "Type" : "Number",
             "MaxValue" : "-10.0"
         },

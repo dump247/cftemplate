@@ -1,0 +1,23 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Parameters" : {
+        "TestList" : {
+            "Type" : "CommaDelimitedList"
+        }
+    },
+    "Resources" : {
+        "Dummy" : {
+            "Type" : "AWS::CloudFormation::WaitConditionHandle",
+            "Properties" : {
+                "A" : {
+                    "Fn::Select" : [ "0", {
+                        "Ref" : "TestList"
+                    } ]
+                },
+                "B" : {
+                    "Fn::Select" : [ "1", [ "a", "b" ] ]
+                }
+            }
+        }
+    }
+}

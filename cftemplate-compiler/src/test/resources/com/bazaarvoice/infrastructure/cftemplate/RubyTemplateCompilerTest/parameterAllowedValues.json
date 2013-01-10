@@ -1,19 +1,6 @@
 {
     "AWSTemplateFormatVersion" : "2010-09-09",
     "Parameters" : {
-        "P1" : {
-            "Type" : "String",
-            "AllowedValues" : [ ]
-        },
-        "P2" : {
-            "Type" : "String",
-            "AllowedValues" : [ "a" ]
-        },
-        "P3" : {
-            "Type" : "String",
-            "Default" : "b",
-            "AllowedValues" : [ "a", "b" ]
-        },
         "P4" : {
             "Type" : "String",
             "AllowedValues" : [ ]
@@ -26,6 +13,10 @@
         "P6" : {
             "Type" : "String",
             "AllowedValues" : [ "a", "b" ]
+        },
+        "P7" : {
+            "Type" : "Number",
+            "AllowedValues" : [ "1", "2" ]
         }
     },
     "Resources" : {

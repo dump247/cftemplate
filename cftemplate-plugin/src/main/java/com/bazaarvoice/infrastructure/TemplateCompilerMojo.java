@@ -8,7 +8,6 @@ import com.bazaarvoice.infrastructure.cftemplate.RubyTemplateCompiler;
 import com.bazaarvoice.infrastructure.cftemplate.TemplateCompiler;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.maven.model.Resource;
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 
@@ -43,6 +42,13 @@ public class TemplateCompilerMojo
     private MavenProject project;
 
     /**
+     * @parameter default-value="${project.build.directory}/cftemplate-compiler"
+     * @required
+     * @readonly
+     */
+    private File stateDir;
+
+    /**
      * Directory to load templates from.
      *
      * @parameter expression="${basedir}/src/main/cftemplates"
@@ -59,14 +65,14 @@ public class TemplateCompilerMojo
     private File outputDirectory;
 
     /**
-     * Set of patterns for files to include in compilation. Default is *.rb and *.json.
+     * Set of case-insensitive patterns for files to include in compilation. Default is *stack.rb and *stack.json.
      *
      * @parameter
      */
-    private Set<String> includes = newHashSet("*.rb", "*.json");
+    private Set<String> includes = newHashSet("*stack.rb", "*stack.json");
 
     /**
-     * Set of patterns for files to exclude from compilation. Default is no excludes.
+     * Set of case-insensitive patterns for files to exclude from compilation. Default is no excludes.
      *
      * @parameter
      */
@@ -85,7 +91,7 @@ public class TemplateCompilerMojo
     public void execute()
             throws MojoExecutionException {
         if (!inputDirectory.isDirectory()) {
-            getLog().info(String.format("No templates found in %s", inputDirectory));
+            info("No templates found in %s", inputDirectory);
             return;
         }
 
@@ -106,26 +112,22 @@ public class TemplateCompilerMojo
             } else if (extension.equals("json")) {
                 compiler = _jsonTemplateCompiler;
             } else {
-                getLog().warn(String.format("Unknown CloudFormation template type: %s", file));
+                warn("Unknown CloudFormation template type: %s", file);
             }
 
             if (compiler != null) {
-                if (isNewer(file, outputFile)) {
-                    compiles.add(new Compilation(file, outputFile, compiler));
-                } else {
-                    getLog().debug(String.format("Skipping compile; output is newer than source. %s => %s", file, outputFile));
-                }
+                compiles.add(new Compilation(file, outputFile, compiler));
             }
         }
 
         if (compiles.size() == 0) {
-            getLog().info(String.format("No templates to compile in %s", inputDirectory));
+            info("No templates to compile in %s", inputDirectory);
         } else {
-            getLog().info(String.format("Compiling %d CloudFormation templates to %s", compiles.size(), outDir));
+            info("Compiling %d CloudFormation templates to %s", compiles.size(), outDir);
             int failures = 0;
 
             for (Compilation c : compiles) {
-                getLog().info(String.format("Compiling %s to %s", c.sourceFile, c.targetFile));
+                info("Compiling %s to %s", c.sourceFile, c.targetFile);
 
                 try {
                     CompileResult result = c.compile();
@@ -177,13 +179,13 @@ public class TemplateCompilerMojo
 
             if (level.compareTo(CompileIssueLevel.ERROR) >= 0) {
                 failureCount += 1;
-                getLog().error(message);
+                error(message);
             } else if (level.compareTo(CompileIssueLevel.WARN) >= 0) {
-                getLog().warn(message);
+                warn(message);
             } else if (level.compareTo(CompileIssueLevel.INFO) >= 0) {
-                getLog().info(message);
+                info(message);
             } else {
-                getLog().debug(message);
+                debug(message);
             }
         }
 
@@ -206,9 +208,7 @@ public class TemplateCompilerMojo
     }
 
     private File getOutputDirectory() {
-        if (!outputDirectory.exists()) {
-            outputDirectory.mkdirs();
-        }
+        createDirectory(outputDirectory);
 
         boolean found = false;
 
@@ -225,10 +225,6 @@ public class TemplateCompilerMojo
         }
 
         return outputDirectory;
-    }
-
-    private static boolean isNewer(File source, File target) {
-        return !target.exists() || source.lastModified() > target.lastModified();
     }
 
     private static class Compilation {

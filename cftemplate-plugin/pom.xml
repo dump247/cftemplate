@@ -4,21 +4,21 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>aws-deploy</artifactId>
-        <groupId>com.bazaarvoice.infrastructure</groupId>
+        <groupId>cftemplate</groupId>
+        <artifactId>parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>com.bazaarvoice.infrastructure</groupId>
+    <groupId>cftemplate</groupId>
     <artifactId>cftemplate-plugin</artifactId>
     <packaging>maven-plugin</packaging>
 
-    <name>CloudFormation Template Compiler Maven Plugin</name>
-    
+    <name>Template Compiler Maven Plugin</name>
+
     <dependencies>
         <dependency>
-            <groupId>com.bazaarvoice.infrastructure</groupId>
+            <groupId>cftemplate</groupId>
             <artifactId>cftemplate-compiler</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -41,6 +41,11 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk</artifactId>
         </dependency>
     </dependencies>
 </project>

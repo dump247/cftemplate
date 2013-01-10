@@ -1,5 +1,3 @@
-require 'cftemplate'
-
 template '2010-09-09' do
   stack 'myStack' do
     url 'https://s3.amazonaws.com/cloudformation-templates-us-east-1/S3_Bucket.template'

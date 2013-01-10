@@ -11,7 +11,7 @@ class Timespan
     hours = values.fetch(:hours, 0) + (days * 24)
     minutes = values.fetch(:minutes, 0) + (hours * 60)
     seconds = values.fetch(:seconds, 0) + (minutes * 60)
-    @total_mils = (values.fetch(:milliseconds, 0) + (seconds * 1000)).to_f
+    @total_mils = (values.fetch(:milliseconds, 0) + (seconds * 1000)).to_i
   end
 
   # Get the total number of days represented by this timespan
@@ -20,10 +20,24 @@ class Timespan
     @total_mils / MILLISECONDS_PER_DAY
   end
 
+  # Get the total number of days represented by this timespan, rounded
+  # up to the next day.
+  # @return [Int] total days
+  def in_days
+    to_days.ceil
+  end
+
   # Get the total number of hours represented by this timespan
   # @return [Float] total hours
   def to_hours
     @total_mils / MILLISECONDS_PER_HOUR
+  end
+
+  # Get the total number of hours represented by this timespan, rounded
+  # up to the next hour.
+  # @return [Int] total hours
+  def in_hours
+    to_hours.ceil
   end
 
   # Get the total number of minutes represented by this timespan
@@ -32,15 +46,35 @@ class Timespan
     @total_mils / MILLISECONDS_PER_MINUTE
   end
 
+  # Get the total number of minutes represented by this timespan,
+  # rounded up to the next minute.
+  # @return [Int] total minutes
+  def in_minutes
+    to_minutes.ceil
+  end
+
   # Get the total number of seconds represented by this timespan
   # @return [Float] total seconds
   def to_seconds
     @total_mils / MILLISECONDS_PER_SECOND
   end
 
+  # Get the total number of seconds represented by this timespan, rounded up to
+  # the next second.
+  # @return [Int] total seconds
+  def in_seconds
+    to_seconds.ceil
+  end
+
   # Get the total number of milliseconds represented by this timespan
   # @return [Float] total milliseconds
   def to_milliseconds
+    @total_mils.to_f
+  end
+
+  # Get the total number of milliseconds represented by this timespan
+  # @return [Int] total milliseconds
+  def in_milliseconds
     @total_mils
   end
 

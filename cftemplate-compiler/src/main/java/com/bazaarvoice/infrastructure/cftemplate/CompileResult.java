@@ -4,6 +4,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 
+import java.io.File;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -18,18 +19,51 @@ public class CompileResult {
     private final List<CompileIssue> _issues;
     private final ListMultimap<CompileIssueLevel, CompileIssue> _issuesByLevel = ArrayListMultimap.create();
 
+    private final List<String> _files;
+
     /**
      * Initialize a new instance.
      *
+     * @param files files that were part of the compilation unit
      * @param issues compilation issues or empty if compile completed with no issues
      */
-    public CompileResult(Iterable<CompileIssue> issues) {
+    public CompileResult(Iterable<String> files, Iterable<CompileIssue> issues) {
+        _files = ImmutableList.copyOf(files);
         _issues = ImmutableList.copyOf(issues);
 
         for (CompileIssue issue : _issues) {
             checkArgument(issue != null, "issues can not contain null");
             _issuesByLevel.put(issue.getLevel(), issue);
         }
+    }
+
+    /**
+     * Initialize a new instance.
+     *
+     * @param file file that was compiled
+     * @param issues compilation issues or empty if compile completed with no issues
+     */
+    public CompileResult(String file, Iterable<CompileIssue> issues) {
+        this(ImmutableList.of(file), issues);
+    }
+
+    /**
+     * Initialize a new instance.
+     *
+     * @param file file that was compiled
+     * @param issues compilation issues or empty if compile completed with no issues
+     */
+    public CompileResult(File file, Iterable<CompileIssue> issues) {
+        this(ImmutableList.of(file.toString()), issues);
+    }
+
+    /**
+     * Files that made up the compilation unit.
+     *
+     * @return files that were compiled
+     */
+    public List<String> getFiles() {
+        return _files;
     }
 
     /**

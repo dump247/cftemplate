@@ -1,27 +1,22 @@
-require 'cftemplate'
-
 # Max 32 parameters
 
 template '2010-09-09' do
-  parameter 'P1', 'String',
-            'AllowedValues' => []
+  parameter 'P4', 'String' do
+    values []
+  end
 
-  parameter 'P2', 'String',
-            'AllowedValues' => ['a']
+  parameter 'P5', 'String' do
+    default 'a'
+    values ['a']
+  end
 
-  parameter 'P3', 'String',
-            :default => 'b',
-            'AllowedValues' => ['a', 'b']
+  parameter 'P6', 'String' do
+    values ['a', 'b']
+  end
 
-  parameter 'P4', 'String',
-            :values => []
-
-  parameter 'P5', 'String',
-            :default => 'a',
-            :values => ['a']
-
-  parameter 'P6', 'String',
-            :values => ['a', 'b']
+  parameter 'P7', :Number do
+    values [1, 2]
+  end
 
 
   # At least one resource is required

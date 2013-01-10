@@ -19,6 +19,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.filterEntries;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 
@@ -56,6 +57,7 @@ public class RubyTemplateCompiler extends TemplateCompiler {
             engine.put("$cftemplate_output", output);
             engine.setCurrentDirectory(inputFile.getParent());
             engine.setCompatVersion(CompatVersion.RUBY1_9);
+            engine.runScriptlet("require 'cftemplate'");
             engine.runScriptlet(PathType.ABSOLUTE, inputFile.getAbsolutePath());
 
             Map<String, Object> templateMap = newHashMap();
@@ -79,7 +81,7 @@ public class RubyTemplateCompiler extends TemplateCompiler {
             output.issues.add(new CompileIssue(CompileIssueLevel.ERROR, ex.getMessage(), location));
         }
 
-        result = new CompileResult(output.issues);
+        result = new CompileResult(output.getFiles(inputFile), output.issues);
 
         if (resultNode != null && result.getIssues(CompileIssueLevel.ERROR).size() == 0) {
             new ObjectMapper()
@@ -93,6 +95,8 @@ public class RubyTemplateCompiler extends TemplateCompiler {
     public static class CompileOutput {
         public String description;
         public String version;
+
+        public final List<String> files = newArrayList();
 
         public final Map<String, Map<String, String>> parameters = newLinkedHashMap();
         public final Map<String, Map<String, Map<String, Object>>> mappings = newLinkedHashMap();
@@ -123,13 +127,24 @@ public class RubyTemplateCompiler extends TemplateCompiler {
             }
         }
 
-        // Called from crtemplate.rb
+        public List<String> getFiles(File main) {
+            List<String> fileList = newArrayList(main.toString());
+            File mainDir = main.getParentFile();
+
+            for (String file : files) {
+                fileList.add(new File(mainDir, file).toString());
+            }
+            
+            return fileList;
+        }
+
+        // Called from cftemplate.rb
         public void setVersion(String caller, String version, String description) {
             this.version = version;
             this.description = description;
         }
 
-        // Called from crtemplate.rb
+        // Called from cftemplate.rb
         public void addParameter(String caller, String name, Map<String, String> value) {
             Map<String, String> args = clone(value); // Must copy the map, otherwise errors occur later
 
@@ -140,7 +155,7 @@ public class RubyTemplateCompiler extends TemplateCompiler {
             }
         }
 
-        // Called from crtemplate.rb
+        // Called from cftemplate.rb
         public void addMapping(String caller, String name, Map<String, Map<String, Object>> value) {
             Map<String, Map<String, Object>> mapValue = clone(value); // Must copy the map, otherwise errors occur later
 
@@ -151,7 +166,7 @@ public class RubyTemplateCompiler extends TemplateCompiler {
             }
         }
 
-        // Called from crtemplate.rb
+        // Called from cftemplate.rb
         public void addOutput(String caller, String name, Map<String, Object> value) {
             Map<String, Object> args = clone(value); // Must copy the map, otherwise errors occur later
 
@@ -162,7 +177,7 @@ public class RubyTemplateCompiler extends TemplateCompiler {
             }
         }
 
-        // Called from crtemplate.rb
+        // Called from cftemplate.rb
         public void addResource(String caller, String name, Map<String, Object> value) {
             Map<String, Object> args = clone(value); // Must copy the map, otherwise errors occur later
 
@@ -173,7 +188,7 @@ public class RubyTemplateCompiler extends TemplateCompiler {
             }
         }
 
-        // Called from crtemplate.rb
+        // Called from cftemplate.rb
         private CompileIssueLocation parseCaller(String value) {
             if (value == null) {
                 return null;
@@ -190,22 +205,27 @@ public class RubyTemplateCompiler extends TemplateCompiler {
             return new CompileIssueLocation(file, line);
         }
 
-        // Called from crtemplate.rb
+        // Called from cftemplate.rb
+        public void addFile(String value) {
+            files.add(value);
+        }
+
+        // Called from cftemplate.rb
         public void error(String caller, String message) {
             issues.add(new CompileIssue(CompileIssueLevel.ERROR, message, parseCaller(caller)));
         }
 
-        // Called from crtemplate.rb
+        // Called from cftemplate.rb
         public void error(String caller, String format, Object... args) {
             issues.add(new CompileIssue(CompileIssueLevel.ERROR, String.format(format, args), parseCaller(caller)));
         }
 
-        // Called from crtemplate.rb
+        // Called from cftemplate.rb
         public void warn(String caller, String message) {
             issues.add(new CompileIssue(CompileIssueLevel.WARN, message, parseCaller(caller)));
         }
 
-        // Called from crtemplate.rb
+        // Called from cftemplate.rb
         public void info(String caller, String message) {
             issues.add(new CompileIssue(CompileIssueLevel.INFO, message, parseCaller(caller)));
         }

@@ -1,5 +1,3 @@
-require 'cftemplate'
-
 template '2010-09-0' do
 
 
