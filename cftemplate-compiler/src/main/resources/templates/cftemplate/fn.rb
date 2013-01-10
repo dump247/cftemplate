@@ -18,11 +18,15 @@ module FN
   # @param index index of the object to retrieve
   # @param list list of objects to select from
   # @return [Hash] { 'Fn::Select' => [index, list] }
-  def select(index, list)
-    if list.is_a? Array
-      {'Fn::Select' => [index, list.flatten(1)]}
+  def select(index, *list)
+    if list.length == 1
+      if list[0].is_a? Array
+        {'Fn::Select' => [index, list[0].flatten(1)]}
+      else
+        {'Fn::Select' => [index, list[0]]}
+      end
     else
-      {'Fn::Select' => [index, list]}
+      {'Fn::Select' => [index, list.flatten(1)]}
     end
   end
 
@@ -88,7 +92,15 @@ module FN
   # @param [Array] content content values to join
   # @return [Hash] { "Fn::Join" => [separator, content] }
   def join(separator, *content)
-    {'Fn::Join' => [separator, content.flatten(1)]};
+    if content.length == 1
+      if content[0].is_a? Array
+        {'Fn::Join' => [separator, content[0].flatten(1)]}
+      else
+        {'Fn::Join' => [separator, content[0]]}
+      end
+    else
+      {'Fn::Join' => [separator, content.flatten(1)]}
+    end
   end
 
   module_function :join
