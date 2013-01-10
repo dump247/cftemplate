@@ -31,6 +31,14 @@ template '2010-09-09' do
 end
 ```
 
+### Description
+
+```ruby
+template '2010-09-09' do
+  description 'Description of the template'
+end
+```
+
 ## Mappings
 
 ```ruby
