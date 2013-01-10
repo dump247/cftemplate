@@ -62,7 +62,7 @@ module Route53
           'Region' => build_resource_value(self.region, issues),
           'TTL' => build_resource_value(self.ttl, issues),
           'Weight' => build_resource_value(self.weight, issues),
-          'Records' => build_resource_value(self.records, issues),
+          'ResourceRecords' => build_resource_value(self.records, issues),
           'AliasTarget' => build_resource_value(@alias_target, issues)
       }.delete_if { |k, v| v.nil? }
     end
