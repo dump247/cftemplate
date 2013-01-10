@@ -31,6 +31,10 @@ module Route53
     end
 
     def resource_record(value)
+      if @resource_records.nil?
+        @resource_records = []
+      end
+
       resource_records.push(value)
     end
 
